@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "vulkanwidget.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -15,9 +17,15 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow();
+
+private slots:
 
 private:
-    Ui::MainWindow *ui;
+    void initializeVulkanWidget();
+
+private:
+    std::unique_ptr<Ui::MainWindow> m_ui;
+    VulkanWidget* m_pVulkanWidget;
 };
 #endif // MAINWINDOW_H
