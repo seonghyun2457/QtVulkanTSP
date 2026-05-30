@@ -20,6 +20,8 @@ public:
     virtual ~MainWindow();
 
 private slots:
+    void displayVulkanInfo(const QString& iVulkanInfo);
+    void displayDebugInfo(const QString& iDebugInfo);
 
 private:
     void initializeVulkanWidget();

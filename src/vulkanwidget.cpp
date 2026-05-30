@@ -34,7 +34,7 @@ bool VulkanWidget::event(QEvent *e)
 
         if (surfaceEvent->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed) {
             if (m_pVulkanRenderer) {
-                qDebug() << "cleanup";
+                emit sendDebugInfo("clean up");
                 m_pVulkanRenderer->cleanup();
             }
         }
@@ -46,7 +46,7 @@ void VulkanWidget::initializeRenderer()
 {
     m_pVulkanRenderer = std::make_unique<VulkanRenderer>(this);
     if (m_pVulkanRenderer == nullptr) {
-        qDebug() << "Failed to crate Vulkan renderer";
+        emit sendDebugInfo("Failed to crate Vulkan renderer");
         return;
     }
 
@@ -55,6 +55,7 @@ void VulkanWidget::initializeRenderer()
 
 void VulkanWidget::draw()
 {
-    qDebug() << "draw";
+    emit sendDebugInfo("draw");
+
 }
 

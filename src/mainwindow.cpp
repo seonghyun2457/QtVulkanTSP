@@ -20,20 +20,36 @@ MainWindow::~MainWindow()
 
 }
 
+void MainWindow::displayVulkanInfo(const QString &iVulkanInfo)
+{
+    m_ui->vulkanInfo->appendPlainText(iVulkanInfo);
+}
+
+void MainWindow::displayDebugInfo(const QString &iDebugInfo)
+{
+    m_ui->debugLog->appendPlainText(iDebugInfo);
+}
+
 
 void MainWindow::initializeVulkanWidget()
 {
     if (!m_pVulkanWidget) {
-        qCritical() << "Failed to instantiate Vulkan window.";
+        displayDebugInfo("Failed to instantiate Vulkan window.");
         return;
     }
 
+    // CONNECT
+    connect(m_pVulkanWidget, &VulkanWidget::sendVulkanInfo, this, &MainWindow::displayVulkanInfo);
+    connect(m_pVulkanWidget, &VulkanWidget::sendDebugInfo, this, &MainWindow::displayDebugInfo);
+
+    // Window Container
     QWidget* pWindowContainer = QWidget::createWindowContainer(m_pVulkanWidget, m_ui->vulkanWindow->parentWidget());
     pWindowContainer->setMouseTracking(true);
     pWindowContainer->setSizePolicy(m_ui->vulkanWindow->sizePolicy());
     pWindowContainer->setMinimumSize(m_ui->vulkanWindow->minimumSize());
 
-    m_ui->horizontalLayout_2->replaceWidget(m_ui->vulkanWindow, pWindowContainer);
+    // Replace Window widget
+    m_ui->vulkanLayout->replaceWidget(m_ui->vulkanWindow, pWindowContainer);
     delete m_ui->vulkanWindow;
     m_ui->vulkanWindow = pWindowContainer;
 }

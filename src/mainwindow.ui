@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="8,2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="8,2">
+     <layout class="QHBoxLayout" name="vulkanLayout" stretch="8,2">
       <property name="spacing">
        <number>6</number>
       </property>
@@ -48,12 +48,12 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="vulkanInfo">
+      <widget class="QPlainTextEdit" name="vulkanInfo">
        <attribute name="title">
         <string>Vulkan Info</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="debugLog">
+      <widget class="QPlainTextEdit" name="debugLog">
        <attribute name="title">
         <string>Debug Log</string>
        </attribute>

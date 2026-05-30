@@ -13,6 +13,8 @@ public:
     virtual ~VulkanWidget();
 
 signals:
+    void sendVulkanInfo(const QString& iVulkanInfoString);
+    void sendDebugInfo(const QString& iDebugString);
 
 protected:
     virtual void exposeEvent(QExposeEvent* event) override;

@@ -18,6 +18,12 @@ public:
 private:
     void createInstance();
     void createSurface();
+    void selectPhysicalDevice();
+    void createLogicalDevice();
+
+    // Print information
+    void printVulkanInfo(const QString& iString);
+    void printDebugInfo(const QString& iString);
 
 private:
     // Window
@@ -28,6 +34,9 @@ private:
 
     // Vulkan components
     VkSurfaceKHR m_surface{VK_NULL_HANDLE};
+    VkPhysicalDevice m_physicalDevice;
+    VkDevice m_logicalDevice;
+
 
     // Pointer to function
     QVulkanFunctions* m_pFunctions{nullptr};
