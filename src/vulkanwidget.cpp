@@ -13,6 +13,8 @@ VulkanWidget::VulkanWidget()
 VulkanWidget::~VulkanWidget()
 {
     qDebug() << "destroy VulkanWidget";
+    m_pVulkanRenderer = nullptr;
+    qDebug() << "VulkanWidget destroyed";
 }
 
 void VulkanWidget::exposeEvent(QExposeEvent* event)
@@ -22,7 +24,9 @@ void VulkanWidget::exposeEvent(QExposeEvent* event)
         initializeRenderer();
     }
 
-    if (isExposed()) draw();
+    if (isExposed()) {
+        draw();
+    }
 
     QWindow::exposeEvent(event);
 }
@@ -50,7 +54,13 @@ void VulkanWidget::initializeRenderer()
         return;
     }
 
-    m_pVulkanRenderer->initialize();
+    sendDebugInfo("Initialize Vulkan renderer");
+    m_initisialized = m_pVulkanRenderer->initialize();
+    if (!m_initisialized) {
+        emit sendDebugInfo("Failed to initialize Vulkan renderer");
+    } else {
+        emit sendDebugInfo("Succeeded to initialize Vulkan renderer");
+    };
 }
 
 void VulkanWidget::draw()
