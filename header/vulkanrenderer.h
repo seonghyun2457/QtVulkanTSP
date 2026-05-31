@@ -40,6 +40,7 @@ private:
     VkCommandPool createCommandPool(const uint32_t iQueueFamilyIndex);
     void createSwapChain();
     void createDescriptorSetLayout();
+    void createSynchronization();
 
     // Print information
     void printVulkanInfo(const QString& iString) const;
@@ -110,6 +111,13 @@ private:
 
     // - Descriptor Set Layout
     VkDescriptorSetLayout m_descriptorSetLayout{VK_NULL_HANDLE};
+
+    // - Synchronizaiton resources
+    static constexpr uint32_t MAX_FRAMES_IN_FLIGHT{2};
+    std::vector<VkSemaphore> m_imagesAvailable;
+    std::vector<VkSemaphore> m_renderFinished;
+    std::vector<VkFence> m_fences;
+
 
     // SUPPORT
     // - Pointer to functions

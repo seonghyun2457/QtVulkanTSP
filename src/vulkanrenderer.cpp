@@ -32,6 +32,9 @@ bool VulkanRenderer::initialize()
         createCommandPools();
         createSwapChain();
         createDescriptorSetLayout();
+
+
+        createSynchronization();
     } catch (const std::runtime_error& e) {
         printDebugInfo(e.what());
         succeded = false;
@@ -447,7 +450,7 @@ VkCommandPool VulkanRenderer::createCommandPool(const uint32_t iQueueFamilyIndex
 
 void VulkanRenderer::createSwapChain()
 {
-    printDebugInfo("Create Swap Chain");
+    printDebugInfo("Create SwapChain");
 
     // Get SwapChainDetails so we can pick best settings
     m_swapchainDetails = getSwapChainDetails(m_physicalDevice);
@@ -527,6 +530,8 @@ void VulkanRenderer::createSwapChain()
 
 void VulkanRenderer::createDescriptorSetLayout()
 {
+    printDebugInfo("Create Descriptor Set Layout");
+
     // CREATE UNIFORM BUFFER DESCRIPTOR SET LAYOUT
     // uboModelViewProjection binding info
     VkDescriptorSetLayoutBinding uboModelViewProjectionLayoutBinding{};
@@ -551,6 +556,16 @@ void VulkanRenderer::createDescriptorSetLayout()
     Q_ASSERT(m_pDeviceFunctions != nullptr);
     VkResult result = m_pDeviceFunctions->vkCreateDescriptorSetLayout(m_logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &m_descriptorSetLayout);
     if (result != VK_SUCCESS) throw std::runtime_error("Failed to create Descriptor Set Layout");
+}
+
+void VulkanRenderer::createSynchronization()
+{
+    printDebugInfo("Create Synchronization");
+
+    m_imagesAvailable.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    m_renderFinished.resize(MAX_FRAMES_IN_FLIGHT,  VK_NULL_HANDLE);
+    m_fences.resize(MAX_FRAMES_IN_FLIGHT,          VK_NULL_HANDLE);
+
 }
 
 void VulkanRenderer::printVulkanInfo(const QString &iString) const
