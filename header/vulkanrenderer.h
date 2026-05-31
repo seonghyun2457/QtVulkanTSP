@@ -6,6 +6,19 @@
 
 class VulkanWidget;
 
+typedef struct SwapChainDetails {
+    VkSurfaceCapabilitiesKHR surfaceCapabilities;     // Surface properties, e.g. image size/extent
+    std::vector<VkSurfaceFormatKHR> formats;          // Surface image formats, e.g. RGBA and size of each color
+    std::vector<VkPresentModeKHR> presentationModes;   // How images should be presented to screen
+} SwapChainDetails_t;
+
+
+typedef struct SwapchainImage {
+    VkImage image{VK_NULL_HANDLE};
+    VkImageView imageView{VK_NULL_HANDLE};
+} SwapchainImage_t;
+
+
 class VulkanRenderer
 {
 
@@ -15,6 +28,8 @@ public:
 
     bool initialize();
     void cleanup();
+
+    void recreateSwapChain();
 private:
     void createInstance();
     void createSurface();
@@ -29,8 +44,16 @@ private:
     void printVulkanInfo(const QString& iString) const;
     void printDebugInfo(const QString& iString) const;
 
-    // Queue Family functions
+    // Queue Family methods
     const uint32_t getQueueFamilyIndex(const VkQueueFlags iQueueFlags) const;
+
+    // SwapChain methods
+    const SwapChainDetails_t getSwapChainDetails(const VkPhysicalDevice& iDevice);
+    const VkSurfaceFormatKHR chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& iFormats);
+    const VkPresentModeKHR chooseBestPresentationMode(const std::vector<VkPresentModeKHR>& iPresentationModes);
+    const VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& iSurfaceCapabilities);
+    const VkImageView createImageView(const VkImage iImage, const VkFormat iFormat, const VkImageAspectFlags iAspectFlags);
+    void destroySwapChainResources();
 
     // Extension functions
     bool extensionSupported(const char* iExtension) const;
@@ -38,12 +61,20 @@ private:
     // Window
     VulkanWidget* m_window{nullptr};
 
-    // Vulkan components
+    // VULKAN COMPONENTS
     // - QVulkanInstance
     QVulkanInstance m_vulkanInstance;
 
     // - Surface
     VkSurfaceKHR m_surface{VK_NULL_HANDLE};
+    VkSurfaceFormatKHR m_surfaceFormat{};
+
+    // - SwapChain
+    VkSwapchainKHR m_swapchain{VK_NULL_HANDLE};
+    VkSwapchainKHR m_oldSwapchain{VK_NULL_HANDLE};
+    SwapChainDetails_t m_swapchainDetails;
+    std::vector<SwapchainImage_t> m_swapchainImages;
+    VkExtent2D m_extent{};
 
     // - Devices
     // -- Physical Deivce
@@ -71,12 +102,12 @@ private:
     VkQueue m_computeQueue{VK_NULL_HANDLE};
     VkQueue m_transferQueue{VK_NULL_HANDLE};
 
-    // Command Pool
+    // - Command Pool
     VkCommandPool m_graphicsCommandPool{VK_NULL_HANDLE};
     VkCommandPool m_computeCommandPool{VK_NULL_HANDLE};
     VkCommandPool m_transferCommandPool{VK_NULL_HANDLE};
 
-    // Support
+    // SUPPORT
     // - Pointer to functions
     QVulkanFunctions* m_pFunctions{VK_NULL_HANDLE};
     QVulkanDeviceFunctions* m_pDeviceFunctions{VK_NULL_HANDLE};

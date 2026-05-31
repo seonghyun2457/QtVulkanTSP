@@ -19,6 +19,7 @@ signals:
 protected:
     virtual void exposeEvent(QExposeEvent* event) override;
     virtual bool event(QEvent* e) override;
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 
 private:

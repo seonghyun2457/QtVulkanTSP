@@ -25,7 +25,7 @@ void VulkanWidget::exposeEvent(QExposeEvent* event)
     }
 
     if (isExposed()) {
-        draw();
+        // draw();
     }
 
     QWindow::exposeEvent(event);
@@ -40,10 +40,20 @@ bool VulkanWidget::event(QEvent *e)
             if (m_pVulkanRenderer) {
                 emit sendDebugInfo("clean up");
                 m_pVulkanRenderer->cleanup();
+                m_initisialized = false;
             }
         }
     }
     return QWindow::event(e);
+}
+
+void VulkanWidget::resizeEvent(QResizeEvent *event)
+{
+    if (m_initisialized && m_pVulkanRenderer != nullptr) {
+        m_pVulkanRenderer->recreateSwapChain();
+    }
+
+    QWindow::resizeEvent(event);
 }
 
 void VulkanWidget::initializeRenderer()

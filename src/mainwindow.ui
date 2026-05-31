@@ -21,7 +21,14 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QWidget" name="vulkanWindow" native="true"/>
+       <widget class="QWidget" name="vulkanWindow" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>800</width>
+          <height>400</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">

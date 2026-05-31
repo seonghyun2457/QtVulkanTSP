@@ -42,11 +42,28 @@ void MainWindow::initializeVulkanWidget()
     connect(m_pVulkanWidget, &VulkanWidget::sendVulkanInfo, this, &MainWindow::displayVulkanInfo);
     connect(m_pVulkanWidget, &VulkanWidget::sendDebugInfo, this, &MainWindow::displayDebugInfo);
 
+    qDebug() << "m_pVulkanWidget->width(): " << m_pVulkanWidget->width();
+    qDebug() << "m_pVulkanWidget->height(): " << m_pVulkanWidget->height();
+
+    m_pVulkanWidget->setWidth(900);
+    m_pVulkanWidget->setHeight(500);
+
+    qDebug() << "m_pVulkanWidget->width(): " << m_pVulkanWidget->width();
+    qDebug() << "m_pVulkanWidget->height(): " << m_pVulkanWidget->height();
+
     // Window Container
     QWidget* pWindowContainer = QWidget::createWindowContainer(m_pVulkanWidget, m_ui->vulkanWindow->parentWidget());
     pWindowContainer->setMouseTracking(true);
     pWindowContainer->setSizePolicy(m_ui->vulkanWindow->sizePolicy());
     pWindowContainer->setMinimumSize(m_ui->vulkanWindow->minimumSize());
+
+    qDebug() << "pWindowContainer->sizePolicy(): " << pWindowContainer->sizePolicy();
+    qDebug() << "pWindowContainer->minimumSize(): " << pWindowContainer->minimumSize();
+    qDebug() << "pWindowContainer->width(): " << pWindowContainer->width();
+    qDebug() << "pWindowContainer->height(): " << pWindowContainer->height();
+    pWindowContainer->resize(900, 500);
+    qDebug() << "pWindowContainer->width(): " << pWindowContainer->width();
+    qDebug() << "pWindowContainer->height(): " << pWindowContainer->height();
 
     // Replace Window widget
     m_ui->vulkanLayout->replaceWidget(m_ui->vulkanWindow, pWindowContainer);
