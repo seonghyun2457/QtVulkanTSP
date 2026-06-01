@@ -117,6 +117,7 @@ private:
     std::vector<VkSemaphore> m_imagesAvailable;
     std::vector<VkSemaphore> m_renderFinished;
     std::vector<VkFence> m_fences;
+    size_t m_currentFrame{0};
 
 
     // SUPPORT

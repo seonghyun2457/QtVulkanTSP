@@ -76,6 +76,27 @@ void VulkanRenderer::cleanup()
         m_transferCommandPool = VK_NULL_HANDLE;
     }
 
+    // Destroy Semaphores and Fences
+    {
+        auto* vkDestroySemaphore = (PFN_vkDestroySemaphore)(m_vulkanInstance.getInstanceProcAddr("vkDestroySemaphore"));
+        Q_ASSERT(vkDestroySemaphore != nullptr);
+
+        auto* vkDestroyFence = (PFN_vkDestroyFence)(m_vulkanInstance.getInstanceProcAddr("vkDestroyFence"));
+        Q_ASSERT(vkDestroyFence != nullptr);
+
+        for (size_t i = 0; i < m_imagesAvailable.size(); ++i) {
+            vkDestroySemaphore(m_logicalDevice, m_imagesAvailable[i], nullptr);
+        }
+
+        for (size_t i = 0; i < m_renderFinished.size(); ++i) {
+            vkDestroySemaphore(m_logicalDevice, m_renderFinished[i], nullptr);
+        }
+
+        for (size_t i = 0; i < m_fences.size(); ++i) {
+            vkDestroyFence(m_logicalDevice, m_fences[i], nullptr);
+        }
+    }
+
     // Destroy SwapChain
     {
         // Destroy Image view
@@ -562,10 +583,38 @@ void VulkanRenderer::createSynchronization()
 {
     printDebugInfo("Create Synchronization");
 
+    Q_ASSERT(m_pDeviceFunctions!= nullptr);
+
     m_imagesAvailable.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
     m_renderFinished.resize(MAX_FRAMES_IN_FLIGHT,  VK_NULL_HANDLE);
     m_fences.resize(MAX_FRAMES_IN_FLIGHT,          VK_NULL_HANDLE);
 
+    // Semaphore creation information
+    VkSemaphoreCreateInfo semaphoreCreateInfo{};
+    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    // Fence creation information
+    VkFenceCreateInfo fenceCreateInfo{};
+    fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    for (size_t i = 0; i < m_fences.size(); ++i) {
+        if ((m_pDeviceFunctions->vkCreateFence(m_logicalDevice, &fenceCreateInfo, nullptr, &m_fences[i])) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to fences");
+        }
+    }
+
+    for (size_t i = 0; i < m_imagesAvailable.size(); ++i) {
+        if ((m_pDeviceFunctions->vkCreateSemaphore(m_logicalDevice, &semaphoreCreateInfo, nullptr, &m_imagesAvailable[i])) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create semamphores");
+        }
+    }
+
+    for (size_t i = 0; i < m_renderFinished.size(); ++i) {
+        if ((m_pDeviceFunctions->vkCreateSemaphore(m_logicalDevice, &semaphoreCreateInfo, nullptr, &m_renderFinished[i])) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create semamphores");
+        }
+    }
 }
 
 void VulkanRenderer::printVulkanInfo(const QString &iString) const
