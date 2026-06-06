@@ -59,12 +59,15 @@ bool VulkanRenderer::initialize()
     return succeded;
 }
 
-void VulkanRenderer::cleanup()
+void VulkanRenderer::cleanup(std::vector<Rectangle>& iObjects)
 {
     Q_ASSERT(m_pDeviceFunctions != VK_NULL_HANDLE);
 
     // Wait until Idle status
     m_pDeviceFunctions->vkDeviceWaitIdle(m_logicalDevice);
+
+    // Destroy all objects
+    iObjects.clear();
 
     // Destroy descriptor pool
     if (m_descriptorPool != VK_NULL_HANDLE) {

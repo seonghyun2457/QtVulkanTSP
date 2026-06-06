@@ -1,5 +1,8 @@
 #include "vulkanwidget.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <QExposeEvent>
 #include <QDebug>
 
@@ -16,8 +19,6 @@ VulkanWidget::VulkanWidget()
 
 VulkanWidget::~VulkanWidget()
 {
-    m_objects.clear();
-
     qDebug() << "destroy VulkanWidget";
     m_pVulkanRenderer = nullptr;
     qDebug() << "VulkanWidget destroyed";
@@ -40,6 +41,11 @@ void VulkanWidget::exposeEvent(QExposeEvent* event)
 bool VulkanWidget::event(QEvent* e)
 {
     if (e->type() == QEvent::UpdateRequest) {
+        for (size_t i = 0; i < m_objects.size(); ++i) {
+            glm::mat4 modelMat = glm::rotate(glm::mat4(1.f), glm::radians(10.f), glm::vec3(0.0f, 1.0f, 0.0f));
+            modelMat = glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f));
+            m_objects[i].setModel(modelMat);
+        }
         draw();
         return true;
     }
@@ -50,7 +56,7 @@ bool VulkanWidget::event(QEvent* e)
         if (surfaceEvent->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed) {
             if (m_pVulkanRenderer) {
                 emit sendDebugInfo("clean up");
-                m_pVulkanRenderer->cleanup();
+                m_pVulkanRenderer->cleanup(m_objects);
                 m_initisialized = false;
             }
         }
@@ -94,7 +100,7 @@ void VulkanWidget::initializeRenderer()
     } else {
         emit sendDebugInfo("Succeeded to initialize Vulkan renderer");
 
-        // m_objects.emplace_back(m_pVulkanRenderer.get());
+        m_objects.emplace_back(m_pVulkanRenderer.get());
     };
 }
 

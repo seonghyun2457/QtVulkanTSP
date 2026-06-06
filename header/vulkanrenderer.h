@@ -32,7 +32,7 @@ public:
     virtual ~VulkanRenderer();
 
     bool initialize();
-    void cleanup();
+    void cleanup(std::vector<Rectangle>& iObjects);
 
     void recreateSwapChain();
 
