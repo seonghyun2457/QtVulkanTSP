@@ -2,6 +2,7 @@
 
 #include "vulkanwidget.h"
 
+#include <QDir>
 #include <QtAssert>
 #include <QVariant>
 
@@ -1173,8 +1174,8 @@ void VulkanRenderer::createGraphicsPipeline()
 
     // HANDLE SHADERS
     // Read in SPIR-V code of shaders
-    std::vector<char> vertexShaderCode = readFile("../../shaders/vert.spv");
-    std::vector<char> fragmentShaderCode = readFile("../../shaders/frag.spv");
+    std::vector<char> vertexShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanTSP/shaders/vert.spv");
+    std::vector<char> fragmentShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanTSP/shaders/frag.spv");
 
     // Build shader modules to link to Graphics pipeline
     VkShaderModule vertexShaderModule = createShaderModule(vertexShaderCode);
