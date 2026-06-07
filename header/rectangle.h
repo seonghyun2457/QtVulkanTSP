@@ -15,8 +15,14 @@ class VulkanRenderer;
 class Rectangle
 {
 public:
-    Rectangle(VulkanRenderer* renderer);
+    Rectangle(VulkanRenderer* renderer, const std::vector<Vertex>& vertices);
     virtual ~Rectangle();
+
+    Rectangle(const Rectangle& iOther) = delete;
+    Rectangle& operator=(const Rectangle& iOther) = delete;
+
+    Rectangle(Rectangle&& iOther) noexcept;
+    Rectangle& operator=(Rectangle&& iOther) noexcept;
 
     const glm::mat4 getModel() const;
     void setModel(const glm::mat4& iModel);
