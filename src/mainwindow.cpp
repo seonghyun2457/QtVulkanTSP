@@ -10,8 +10,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_ui(std::make_unique<Ui::MainWindow>())
     , m_pVulkanWidget(new VulkanWidget())
+    , m_performaceMessage("Qt + Vulkan TSP - [CPU FPS: %1 (%2ms/frame), GPU FPS equiv: %3 (%4ms/frame)]")
 {
     m_ui->setupUi(this);
+
+    m_performaceMessage.reserve(256);
 
     initializeGuiWidgets();
     initializeVulkanWidget();
@@ -36,6 +39,26 @@ void MainWindow::onMousePressed(Qt::MouseButton button, const QPointF &position)
 {
     QString msg = QString("%1 button clicked at (%2, %3)").arg(button).arg(position.x()).arg(position.y());
     displayDebugInfo(msg);
+}
+
+void MainWindow::updateGpuTime(const float iGpuTime)
+{
+    m_gpuTime = iGpuTime;
+    displayPerformace();
+}
+
+void MainWindow::updateCpuFps(const float iFps)
+{
+    m_cpuFps = iFps;
+    displayPerformace();
+}
+
+void MainWindow::displayPerformace()
+{
+    const float cpuMsPerFrame = (m_cpuFps > 0.f) ? (1000.f / m_cpuFps) : 0.f;
+    const float gpuFpsEquiv = (m_gpuTime > 0.f) ? (1000.f / m_gpuTime) : 0.f;
+
+    setWindowTitle(m_performaceMessage.arg(m_cpuFps, 0, 'f', 3).arg(cpuMsPerFrame, 0, 'f', 3).arg(gpuFpsEquiv, 0, 'f', 3).arg(m_gpuTime, 0, 'f', 3));
 }
 
 void MainWindow::setRowCount(const int iIndex)
@@ -87,6 +110,8 @@ void MainWindow::initializeVulkanWidget()
     // - Logging
     connect(m_pVulkanWidget, &VulkanWidget::sendVulkanInfo, this, &MainWindow::displayVulkanInfo);
     connect(m_pVulkanWidget, &VulkanWidget::sendDebugInfo, this, &MainWindow::displayDebugInfo);
+    connect(m_pVulkanWidget, &VulkanWidget::gpuTimeUpdated, this, &MainWindow::updateGpuTime);
+    connect(m_pVulkanWidget, &VulkanWidget::cpuFpsUpdated, this, &MainWindow::updateCpuFps);
 
     // - Mouse events
     connect(m_pVulkanWidget,  &VulkanWidget::mousePressed, this, &MainWindow::onMousePressed);

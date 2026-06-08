@@ -45,6 +45,9 @@ public:
     void destroyBuffer(VkBuffer& ioBuffer);
     void destroyBufferMemory(VkDeviceMemory& ioBufferMemory);
 
+    // Read GPU spent time for previous frame
+    float readGPUFrameTime();
+
 private:
     void createInstance();
     void createSurface();
@@ -59,6 +62,7 @@ private:
     VkShaderModule createShaderModule(const std::vector<char>& iShaderCode);
 
     // After graphics pipeline
+    void createQueryPools();
     void createCommandPools();
     VkCommandPool createCommandPool(const uint32_t iQueueFamilyIndex);
     void createCommandBuffers();
@@ -98,8 +102,12 @@ private:
                       VkDeviceMemory& oBufferMemory);
     const uint32_t findMemoryTypeIndex(const VkPhysicalDevice iPhysicalDevice, const uint32_t allowdedTypes, const VkMemoryPropertyFlags properties);
 
+    // Read GPU spent time for iFrameIndex
+    float readGPUFrameTime(const size_t iFrameIndex);
+
     // Extension functions
     bool extensionSupported(const char* iExtension) const;
+
 private:
     // Drawbale objects
     std::vector<Rectangle> m_objects;
@@ -158,6 +166,16 @@ private:
     VkPipelineLayout m_pipelineLayout{VK_NULL_HANDLE};
     VkPipeline m_pipeline{VK_NULL_HANDLE};
 
+    // GPU FPS
+    // -- Query Count
+    static constexpr uint32_t FPS_QUERY_COUNT{2}; // Start timestamp and End timestamp
+
+    // -- Query Pool
+    std::vector<VkQueryPool> m_queryPools;
+
+    // -- gpu time in milliseconds
+    std::vector<float> m_gpuTimesMs;
+
     // - Command Pool
     VkCommandPool m_graphicsCommandPool{VK_NULL_HANDLE};
     VkCommandPool m_computeCommandPool{VK_NULL_HANDLE};
@@ -186,6 +204,7 @@ private:
     std::vector<VkSemaphore> m_renderFinished;
     std::vector<VkFence> m_fences;
     size_t m_currentFrame{0};
+    size_t m_prevFrame{0};
 
     // SUPPORT
     // - Pointer to functions

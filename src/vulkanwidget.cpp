@@ -138,6 +138,16 @@ void VulkanWidget::draw()
 {
     if (m_pVulkanRenderer && m_initisialized) {
         m_pVulkanRenderer->draw();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+
+        if (m_hasLastFrameTime) {
+            const float deltaTime = std::chrono::duration<float>(currentTime - m_lastFrameTime).count(); // in second
+            updatePerformanceMetrics(deltaTime);
+        }
+
+        m_lastFrameTime = currentTime;
+        m_hasLastFrameTime = true;
     }
 
 
@@ -145,5 +155,32 @@ void VulkanWidget::draw()
         requestUpdate();
     }
 
+}
+
+void VulkanWidget::updatePerformanceMetrics(const float iDeltaTime)
+{
+    m_cpuFrameSinceLastUpdate++;
+    m_cpuFpsUpdateTimer += iDeltaTime;
+
+    if (m_cpuFpsUpdateTimer >= FPS_UPDATE_INTERVAL_TIME) {
+        float cpuFps = m_cpuFrameSinceLastUpdate / m_cpuFpsUpdateTimer;
+
+        emit cpuFpsUpdated(cpuFps);
+
+        // Reset counters
+        m_cpuFrameSinceLastUpdate = 0;
+        m_cpuFpsUpdateTimer = 0.f;
+    }
+
+    m_gpuFpsUpdateTimer += iDeltaTime;
+
+    if (m_gpuFpsUpdateTimer >= (2.f * FPS_UPDATE_INTERVAL_TIME)) {
+        float gpuTimeMs = m_pVulkanRenderer->readGPUFrameTime();
+
+        emit gpuTimeUpdated(gpuTimeMs);
+
+        // Reset timer
+        m_gpuFpsUpdateTimer = 0.f;
+    }
 }
 

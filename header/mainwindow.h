@@ -31,6 +31,11 @@ private slots:
     // Mouse event slot
     void onMousePressed(Qt::MouseButton button, const QPointF& position);
 
+    // Disply performance metrics
+    void updateGpuTime(const float iGpuTime);
+    void updateCpuFps(const float iFps);
+    void displayPerformace();
+
     // Row & Column slot
     void setRowCount(const int iIndex);
     void setColumnCount(const int iIndex);
@@ -45,5 +50,10 @@ private:
     static constexpr size_t INITIAL_COUNT{2};
     static constexpr size_t MAX_ROW_COUNT{40};
     static constexpr size_t MAX_COLUMN_COUNT{30};
+
+    // Performance Metrics
+    QString m_performaceMessage{""};
+    float m_gpuTime{0.f};
+    float m_cpuFps{0.f};
 };
 #endif // MAINWINDOW_H

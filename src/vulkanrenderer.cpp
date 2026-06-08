@@ -48,6 +48,7 @@ bool VulkanRenderer::initialize()
 
         // Create after Graphics pipeline
         {
+            createQueryPools();
             createCommandPools();
             createCommandBuffers();
             createUniformBuffers();
@@ -153,6 +154,16 @@ void VulkanRenderer::cleanup()
         m_graphicsCommandPool = VK_NULL_HANDLE;
         m_computeCommandPool = VK_NULL_HANDLE;
         m_transferCommandPool = VK_NULL_HANDLE;
+    }
+
+    // Destroy Query pools
+    {
+        for (size_t i = 0; i < m_queryPools.size(); ++i) {
+            if (m_queryPools[i] != VK_NULL_HANDLE) {
+                m_pDeviceFunctions->vkDestroyQueryPool(m_logicalDevice, m_queryPools[i], nullptr);
+                m_queryPools[i] = VK_NULL_HANDLE;
+            }
+        }
     }
 
     // Destroy Graphics pipeline and layout
@@ -331,6 +342,9 @@ void VulkanRenderer::draw()
         VkResult result = vkQueuePresentKHR(m_graphicsQueue, &presentInfo);
         if (result != VK_SUCCESS) throw std::runtime_error("Failed to present the rendered image to screen");
     }
+
+    // Save previous frame for GPU time measurement
+    m_prevFrame = m_currentFrame;
 
     // GET NEXT FRAME
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -587,6 +601,11 @@ void VulkanRenderer::createLogicalDevice()
     enabledFeatures13.dynamicRendering = VK_TRUE; // Enable Dynamic Rendering
     enabledFeatures13.synchronization2 = VK_TRUE;
 
+    VkPhysicalDeviceVulkan12Features enabledFeatures12{};
+    enabledFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    enabledFeatures12.hostQueryReset = VK_TRUE; // Enable CPU to call vkResetQueryPool
+    enabledFeatures12.pNext = &enabledFeatures13; // Connect VkPhysicalDeviceVulkan13Features
+
     // QUEUE FAMILIY
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     const float defaultQueueProiority = 0.f;
@@ -661,7 +680,7 @@ void VulkanRenderer::createLogicalDevice()
     VkPhysicalDeviceFeatures2 physicalDeviceFeatures2{};
     physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     physicalDeviceFeatures2.features = enabledFeatures;
-    physicalDeviceFeatures2.pNext = &enabledFeatures13;
+    physicalDeviceFeatures2.pNext = &enabledFeatures12;
 
     // Information to create logical device
     VkDeviceCreateInfo deviceCreateInfo = {};
@@ -866,6 +885,36 @@ const uint32_t VulkanRenderer::findMemoryTypeIndex(const VkPhysicalDevice iPhysi
     return 0;
 }
 
+float VulkanRenderer::readGPUFrameTime()
+{
+    return readGPUFrameTime(m_prevFrame);
+}
+
+float VulkanRenderer::readGPUFrameTime(const size_t iFrameIndex)
+{
+    Q_ASSERT(m_pDeviceFunctions != nullptr);
+
+    uint64_t timestamps[FPS_QUERY_COUNT] = {0, 0};
+
+    VkResult result = m_pDeviceFunctions->vkGetQueryPoolResults(m_logicalDevice,
+                                                                m_queryPools[iFrameIndex],
+                                                                0,
+                                                                FPS_QUERY_COUNT,
+                                                                sizeof(timestamps), timestamps,
+                                                                sizeof(uint64_t),
+                                                                VK_QUERY_RESULT_64_BIT); // Removed WAIT_BIT
+
+    // if GPU is still VK_NOT_READY or send abnormal values
+    if (result != VK_SUCCESS || timestamps[1] <= timestamps[0]) {
+        return m_gpuTimesMs[iFrameIndex];
+    }
+
+    // Time diff in milliseconds
+    m_gpuTimesMs[iFrameIndex] = (timestamps[1] - timestamps[0]) * m_physicalDeviceProperties.limits.timestampPeriod * 1e-6f;
+
+    return m_gpuTimesMs[iFrameIndex];
+}
+
 void VulkanRenderer::createDescriptorPool()
 {
     printDebugInfo("Create Descriptor pool");
@@ -956,6 +1005,12 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
     // Start recording commands
     VkResult result = m_pDeviceFunctions->vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
     if (result != VK_SUCCESS) throw std::runtime_error("Failed to start recording Command buffer");
+
+    // Reset query pool
+    m_pDeviceFunctions->vkCmdResetQueryPool(commandBuffer, m_queryPools[m_currentFrame], 0, FPS_QUERY_COUNT);
+
+    // Frame start timestamp
+    m_pDeviceFunctions->vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, m_queryPools[m_currentFrame], 0);
 
     // RECORD COMMANDS
     {
@@ -1069,6 +1124,9 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
                                                 0, 0, nullptr, 0, nullptr,
                                                 1, &imageMemoryBarrierToPresent);
     }
+
+    // Frame end timestamp
+    m_pDeviceFunctions->vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, m_queryPools[m_currentFrame], 1);
 
     // Stop recording commands
     result = m_pDeviceFunctions->vkEndCommandBuffer(commandBuffer);
@@ -1423,6 +1481,29 @@ VkShaderModule VulkanRenderer::createShaderModule(const std::vector<char> &iShad
     if (result != VK_SUCCESS) throw std::runtime_error("Failed to create Shader module");
 
     return shaderModule;
+}
+
+void VulkanRenderer::createQueryPools()
+{
+    Q_ASSERT(m_pDeviceFunctions != nullptr);
+
+    m_queryPools.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    m_gpuTimesMs.resize(MAX_FRAMES_IN_FLIGHT, 0.f);
+
+    // Query pool creation info for FPS
+    VkQueryPoolCreateInfo queryPoolCreateInfo{};
+    queryPoolCreateInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+    queryPoolCreateInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+    queryPoolCreateInfo.queryCount = FPS_QUERY_COUNT; // Start-End
+
+    for (size_t i = 0; i < m_queryPools.size(); ++i) {
+        VkResult result = m_pDeviceFunctions->vkCreateQueryPool(m_logicalDevice, &queryPoolCreateInfo, nullptr, &m_queryPools[i]);
+        if (result != VK_SUCCESS) throw std::runtime_error("Failed to create Query pool");
+
+        auto* vkResetQueryPool = (PFN_vkResetQueryPool)m_vulkanInstance.getInstanceProcAddr("vkResetQueryPool");
+        Q_ASSERT(vkResetQueryPool != nullptr);
+        vkResetQueryPool(m_logicalDevice, m_queryPools[i], 0, FPS_QUERY_COUNT);
+    }
 }
 
 void VulkanRenderer::createSynchronization()
