@@ -30,6 +30,7 @@ void VulkanWidget::setRowCount(const uint32_t iRowCount)
     m_rowCount = iRowCount;
     sendDebugInfo("row count: " + QString::number(m_rowCount));
     m_occupied.resize(m_rowCount * m_colCount, false);
+
 }
 
 void VulkanWidget::setColumnCount(const uint32_t iColumnCount)
@@ -37,6 +38,7 @@ void VulkanWidget::setColumnCount(const uint32_t iColumnCount)
     m_colCount = iColumnCount;
     sendDebugInfo("column count: " + QString::number(m_colCount));
     m_occupied.resize(m_rowCount * m_colCount, false);
+
 }
 
 void VulkanWidget::exposeEvent(QExposeEvent* event)
