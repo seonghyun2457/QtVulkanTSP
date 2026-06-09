@@ -350,6 +350,40 @@ void VulkanRenderer::draw()
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+void VulkanRenderer::resetPaths(const int iWidth, const int iHeight, const uint32_t iRowCount, const uint32_t iColCount, std::vector<bool>& oOccupied)
+{
+    // Reset list of drawable objects
+    m_objects.clear();
+    m_objects.reserve(iRowCount * iColCount);
+
+    // Resize Occupied vector
+    oOccupied.resize(iRowCount * iColCount, false);
+
+    const float rectangleWidth = iWidth / static_cast<float>(iColCount);
+    const float rectangleHeight = iHeight / static_cast<float>(iRowCount);
+
+    const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(iColCount);
+    const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(iRowCount);
+
+    float halfWidth = 0.5f * iWidth;
+    float halfHeight = 0.5f * iHeight;
+
+    for (size_t i = 0; i < iRowCount; ++i) {
+        for (size_t j = 0; j < iColCount; ++j) {
+
+            float normalizedXPos = (((j * rectangleWidth) - halfWidth) / static_cast<float>(halfWidth)) + normalizedRectangleHalfWidth;
+            float normalizedYPos = -((((i * rectangleHeight) - halfHeight) / static_cast<float>(halfHeight)) + normalizedRectangleHalfHeight);
+
+            glm::vec2 recPos{normalizedXPos, normalizedYPos};
+
+
+            m_objects.emplace_back(Rectangle(this, recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight));
+        }
+    }
+
+    Q_ASSERT(oOccupied.size() == m_objects.size());
+}
+
 void VulkanRenderer::addRectangle(const glm::vec2 iPos, const float normalizedHalfWidth, const float normalizedHalfHeight)
 {
     m_objects.emplace_back(Rectangle(this, iPos, normalizedHalfWidth, normalizedHalfHeight));

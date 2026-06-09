@@ -14,8 +14,6 @@ VulkanWidget::VulkanWidget()
 
     // Disable mouseMoveEvent
     setMouseGrabEnabled(true);
-
-    m_occupied.resize(m_rowCount * m_colCount, false);
 }
 
 VulkanWidget::~VulkanWidget()
@@ -29,16 +27,20 @@ void VulkanWidget::setRowCount(const uint32_t iRowCount)
 {
     m_rowCount = iRowCount;
     sendDebugInfo("row count: " + QString::number(m_rowCount));
-    m_occupied.resize(m_rowCount * m_colCount, false);
 
+    if (m_pVulkanRenderer && m_initisialized) {
+        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
+    }
 }
 
 void VulkanWidget::setColumnCount(const uint32_t iColumnCount)
 {
     m_colCount = iColumnCount;
     sendDebugInfo("column count: " + QString::number(m_colCount));
-    m_occupied.resize(m_rowCount * m_colCount, false);
 
+    if (m_pVulkanRenderer && m_initisialized) {
+        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
+    }
 }
 
 void VulkanWidget::exposeEvent(QExposeEvent* event)
@@ -107,8 +109,8 @@ void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
 
 void VulkanWidget::traceMousePosition(const QPointF& iPosition)
 {
-    const float rectangleWidth = (width() / static_cast<float>(m_colCount));
-    const float rectangleHeight = (height() / static_cast<float>(m_rowCount));
+    const float rectangleWidth = width() / static_cast<float>(m_colCount);
+    const float rectangleHeight = height() / static_cast<float>(m_rowCount);
 
     const size_t rectangleColIndex = static_cast<size_t>(iPosition.x() / rectangleWidth);
     const size_t rectangleRowIndex = static_cast<size_t>(iPosition.y() / rectangleHeight);
@@ -116,8 +118,8 @@ void VulkanWidget::traceMousePosition(const QPointF& iPosition)
     if (m_occupied[(rectangleRowIndex * m_colCount) + rectangleColIndex] == false) {
         m_occupied[(rectangleRowIndex * m_colCount) + rectangleColIndex] = true;
 
-        const float normalizedRectangleHalfWidth = rectangleWidth / static_cast<float>(width());
-        const float normalizedRectangleHalfHeight = rectangleHeight / static_cast<float>(height());
+        const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(m_colCount);
+        const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(m_rowCount);
 
         float halfWidth = 0.5f * width();
         float halfHeight = 0.5f * height();
@@ -143,6 +145,8 @@ void VulkanWidget::initializeRenderer()
     if (!m_initisialized) {
         emit sendDebugInfo("Failed to initialize Vulkan renderer");
     } else {
+        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
+
         emit sendDebugInfo("Succeeded to initialize Vulkan renderer");
     };
 }
