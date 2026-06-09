@@ -29,7 +29,8 @@ private slots:
     void displayDebugInfo(const QString& iDebugInfo);
 
     // Mouse event slot
-    void onMousePressed(Qt::MouseButton button, const QPointF& position);
+    void onMousePressed(const QPointF& position);
+    void onMouseMoved(const QPointF& position);
 
     // Disply performance metrics
     void updateGpuTime(const float iGpuTime);

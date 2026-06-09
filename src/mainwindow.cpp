@@ -35,10 +35,14 @@ void MainWindow::displayDebugInfo(const QString &iDebugInfo)
     m_ui->debugLog->appendPlainText(iDebugInfo);
 }
 
-void MainWindow::onMousePressed(Qt::MouseButton button, const QPointF &position)
+void MainWindow::onMousePressed(const QPointF &position)
 {
-    QString msg = QString("%1 button clicked at (%2, %3)").arg(button).arg(position.x()).arg(position.y());
-    displayDebugInfo(msg);
+    displayDebugInfo(QString("Mouse clicked at (%1, %2)").arg(position.x()).arg(position.y()));
+}
+
+void MainWindow::onMouseMoved(const QPointF &position)
+{
+    displayDebugInfo(QString("Mouse moved to (%1, %2)").arg(position.x()).arg(position.y()));
 }
 
 void MainWindow::updateGpuTime(const float iGpuTime)
@@ -115,6 +119,8 @@ void MainWindow::initializeVulkanWidget()
 
     // - Mouse events
     connect(m_pVulkanWidget,  &VulkanWidget::mousePressed, this, &MainWindow::onMousePressed);
+    connect(m_pVulkanWidget,  &VulkanWidget::mouseMoved, this, &MainWindow::onMouseMoved);
+
 
     qDebug() << "m_pVulkanWidget->width(): " << m_pVulkanWidget->width();
     qDebug() << "m_pVulkanWidget->height(): " << m_pVulkanWidget->height();

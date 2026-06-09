@@ -20,7 +20,7 @@ signals:
     void sendDebugInfo(const QString& iDebugString);
 
     // Mouse Event signals
-    void mousePressed(Qt::MouseButton iButton, const QPointF& iPosition);
+    void mousePressed(const QPointF& iPosition);
     void mouseMoved(const QPointF& iPosition);
 
     // Performance metrics
@@ -41,6 +41,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
+    void traceMousePosition(const QPointF& iPosition);
     void initializeRenderer();
     void draw();
     void updatePerformanceMetrics(const float iDeltaTime);

@@ -13,7 +13,7 @@ VulkanWidget::VulkanWidget()
     setSurfaceType(QWindow::VulkanSurface);
 
     // Disable mouseMoveEvent
-    setMouseGrabEnabled(false);
+    setMouseGrabEnabled(true);
 
     m_occupied.resize(m_rowCount * m_colCount, false);
 }
@@ -85,11 +85,31 @@ void VulkanWidget::resizeEvent(QResizeEvent* event)
 
 void VulkanWidget::mousePressEvent(QMouseEvent* event)
 {
+    if (event->button() == Qt::LeftButton) {
+        traceMousePosition(event->position());
+
+        emit mousePressed(event->position());
+    }
+    QWindow::mousePressEvent(event);
+}
+
+void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    if (event->buttons() & Qt::LeftButton) {
+        traceMousePosition(event->position());
+
+        emit mouseMoved(event->position());
+    }
+    QWindow::mouseMoveEvent(event);
+}
+
+void VulkanWidget::traceMousePosition(const QPointF& iPosition)
+{
     const float rectangleWidth = (width() / static_cast<float>(m_rowCount));
     const float rectangleHeight = (height() / static_cast<float>(m_colCount));
 
-    const size_t rectangleRowIndex = static_cast<size_t>(event->position().x() / rectangleWidth);
-    const size_t rectangleColIndex = static_cast<size_t>(event->position().y() / rectangleHeight);
+    const size_t rectangleRowIndex = static_cast<size_t>(iPosition.x() / rectangleWidth);
+    const size_t rectangleColIndex = static_cast<size_t>(iPosition.y() / rectangleHeight);
 
     if (m_occupied[(rectangleColIndex * m_rowCount) + rectangleRowIndex] == false) {
         m_occupied[(rectangleColIndex * m_rowCount) + rectangleRowIndex] = true;
@@ -106,15 +126,6 @@ void VulkanWidget::mousePressEvent(QMouseEvent* event)
         glm::vec2 recPos{normalizedXPos, normalizedYPos};
         m_pVulkanRenderer->addRectangle(recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight);
     }
-
-    emit mousePressed(event->button(), event->position());
-    QWindow::mousePressEvent(event);
-}
-
-void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
-{
-    emit mouseMoved(event->position());
-    QWindow::mouseMoveEvent(event);
 }
 
 void VulkanWidget::initializeRenderer()
