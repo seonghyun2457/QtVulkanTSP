@@ -43,6 +43,7 @@ bool VulkanRenderer::initialize()
             createLogicalDevice();
             createSwapChain();
             createDescriptorSetLayout();
+            createPushConstantRange();
             createGraphicsPipeline();
         }
 
@@ -352,6 +353,11 @@ void VulkanRenderer::draw()
 
 void VulkanRenderer::resetPaths(const int iWidth, const int iHeight, const uint32_t iRowCount, const uint32_t iColCount, std::vector<bool>& oOccupied)
 {
+    Q_ASSERT(m_pDeviceFunctions != nullptr);
+
+    // Wait until Idle status
+    m_pDeviceFunctions->vkDeviceWaitIdle(m_logicalDevice);
+
     // Reset list of drawable objects
     m_objects.clear();
     m_objects.reserve(iRowCount * iColCount);
@@ -377,16 +383,18 @@ void VulkanRenderer::resetPaths(const int iWidth, const int iHeight, const uint3
             glm::vec2 recPos{normalizedXPos, normalizedYPos};
 
 
-            m_objects.emplace_back(Rectangle(this, recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight));
+            m_objects.emplace_back(Rectangle(this, recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight, glm::vec3(0.f, 0.f, 0.f)));
         }
     }
 
     Q_ASSERT(oOccupied.size() == m_objects.size());
 }
 
-void VulkanRenderer::addRectangle(const glm::vec2 iPos, const float normalizedHalfWidth, const float normalizedHalfHeight)
+void VulkanRenderer::paintRectangle(const size_t iIndex, const glm::vec3 iColor)
 {
-    m_objects.emplace_back(Rectangle(this, iPos, normalizedHalfWidth, normalizedHalfHeight));
+    if (iIndex < m_objects.size()) {
+        m_objects[iIndex].setColor(iColor);
+    }
 }
 
 void VulkanRenderer::createVertexBuffer(const std::vector<Vertex>& iVertices,VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory)
@@ -1130,6 +1138,10 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
                                                         &m_descriptorSets[iImageIndex],
                                                         0, nullptr);
 
+                // Transfer Color (RGBA) via PushConstant
+                const glm::vec4 color = glm::vec4(iObjects[i].getColor(), 1.f);
+                m_pDeviceFunctions->vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(glm::vec4), &color);
+
                 // Draw by index
                 m_pDeviceFunctions->vkCmdDrawIndexed(commandBuffer, iObjects[i].getIndexCount(), 1, 0, 0, 0);
             }
@@ -1286,6 +1298,13 @@ void VulkanRenderer::createDescriptorSetLayout()
     Q_ASSERT(m_pDeviceFunctions != nullptr);
     VkResult result = m_pDeviceFunctions->vkCreateDescriptorSetLayout(m_logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &m_descriptorSetLayout);
     if (result != VK_SUCCESS) throw std::runtime_error("Failed to create Descriptor Set Layout");
+}
+
+void VulkanRenderer::createPushConstantRange()
+{
+    m_pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // Send PushConstant to fragment shader
+    m_pushConstantRange.offset = 0;
+    m_pushConstantRange.size = sizeof(glm::vec4); // COLOR: RGBA
 }
 
 void VulkanRenderer::createGraphicsPipeline()
@@ -1446,8 +1465,8 @@ void VulkanRenderer::createGraphicsPipeline()
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.setLayoutCount = 1;
         pipelineLayoutCreateInfo.pSetLayouts = &m_descriptorSetLayout;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+        pipelineLayoutCreateInfo.pPushConstantRanges = &m_pushConstantRange;
 
         VkResult result = m_pDeviceFunctions->vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout);
         if (result != VK_SUCCESS) throw std::runtime_error("Failed to create pipeline layout");

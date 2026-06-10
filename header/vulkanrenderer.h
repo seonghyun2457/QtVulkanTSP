@@ -39,7 +39,7 @@ public:
     void draw();
 
     void resetPaths(const int iWidth, const int iHeight, const uint32_t iRowCount, const uint32_t iColCount, std::vector<bool>& oOccupied);
-    void addRectangle(const glm::vec2 iPos, const float normalizedHalfWidth, const float normalizedHalfHeight);
+    void paintRectangle(const size_t iIndex, const glm::vec3 iColor);
 
     void createVertexBuffer(const std::vector<Vertex>& iVertices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
     void createIndexBuffer(const std::vector<uint32_t>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
@@ -59,6 +59,7 @@ private:
     void createQueues();
     void createSwapChain();
     void createDescriptorSetLayout();
+    void createPushConstantRange();
     void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char>& iShaderCode);
 
@@ -162,6 +163,9 @@ private:
     VkQueue m_graphicsQueue{VK_NULL_HANDLE};
     VkQueue m_computeQueue{VK_NULL_HANDLE};
     VkQueue m_transferQueue{VK_NULL_HANDLE};
+
+    // Push Constants
+    VkPushConstantRange m_pushConstantRange{};
 
     // Graphics Pipeline
     VkPipelineLayout m_pipelineLayout{VK_NULL_HANDLE};

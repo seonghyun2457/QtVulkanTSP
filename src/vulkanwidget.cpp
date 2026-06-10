@@ -115,20 +115,14 @@ void VulkanWidget::traceMousePosition(const QPointF& iPosition)
     const size_t rectangleColIndex = static_cast<size_t>(iPosition.x() / rectangleWidth);
     const size_t rectangleRowIndex = static_cast<size_t>(iPosition.y() / rectangleHeight);
 
-    if (m_occupied[(rectangleRowIndex * m_colCount) + rectangleColIndex] == false) {
-        m_occupied[(rectangleRowIndex * m_colCount) + rectangleColIndex] = true;
+    const size_t index = (rectangleRowIndex * m_colCount) + rectangleColIndex;
 
-        const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(m_colCount);
-        const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(m_rowCount);
+    if (m_occupied[index] == false) {
+        m_occupied[index] = true;
 
-        float halfWidth = 0.5f * width();
-        float halfHeight = 0.5f * height();
+        m_pVulkanRenderer->paintRectangle(index, glm::vec3(1.f, 1.f, 0.f));
 
-        float normalizedXPos = (((rectangleColIndex * rectangleWidth) - halfWidth) / static_cast<float>(halfWidth)) + normalizedRectangleHalfWidth;
-        float normalizedYPos = -((((rectangleRowIndex * rectangleHeight) - halfHeight) / static_cast<float>(halfHeight)) + normalizedRectangleHalfHeight);
-
-        glm::vec2 recPos{normalizedXPos, normalizedYPos};
-        m_pVulkanRenderer->addRectangle(recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight);
+        emit sendDebugInfo("change Rectangle color");
     }
 }
 

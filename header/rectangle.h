@@ -15,7 +15,7 @@ class VulkanRenderer;
 class Rectangle
 {
 public:
-    Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight);
+    Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeigh, const glm::vec3 iColor);
     virtual ~Rectangle();
 
     Rectangle(const Rectangle& iOther) = delete;
@@ -26,6 +26,9 @@ public:
 
     const glm::mat4 getModel() const;
     void setModel(const glm::mat4& iModel);
+
+    const glm::vec3 getColor() const;
+    void setColor(const glm::vec3& iColor);
 
     const uint32_t getIndexCount() const;
 
@@ -38,6 +41,7 @@ private:
 private:
     VulkanRenderer* m_renderer{nullptr};
     glm::mat4 m_model;
+    glm::vec3 m_color;
 
     std::vector<Vertex> m_vertices;
     std::vector<uint32_t> m_indices;

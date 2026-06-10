@@ -4,14 +4,15 @@
 
 #include "vulkanrenderer.h"
 
-Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight)
+Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight, const glm::vec3 iColor)
     : m_renderer(renderer)
+    , m_color(iColor)
 {
     m_vertices = {
-                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y + halfHeight, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 0
-                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y - halfHeight, 0.f), glm::vec3(1.f, 0.f, 0.f)),  // 1
-                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y - halfHeight, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 2
-                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y + halfHeight, 0.f),   glm::vec3(1.f, 0.f, 0.f))   // 3
+                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y + halfHeight, 0.f), m_color),  // 0
+                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y - halfHeight, 0.f), m_color),  // 1
+                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y - halfHeight, 0.f), m_color),  // 2
+                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y + halfHeight, 0.f), m_color)   // 3
                  };
 
 
@@ -81,6 +82,21 @@ const glm::mat4 Rectangle::getModel() const
 void Rectangle::setModel(const glm::mat4 &iModel)
 {
     m_model = iModel;
+}
+
+const glm::vec3 Rectangle::getColor() const
+{
+    return m_color;
+}
+
+void Rectangle::setColor(const glm::vec3 &iColor)
+{
+    /*
+    for (Vertex& vertex : m_vertices) {
+        vertex.col = iColor;
+    }
+    */
+    m_color = iColor;
 }
 
 const uint32_t Rectangle::getIndexCount() const
