@@ -100,9 +100,13 @@ void VulkanWidget::mousePressEvent(QMouseEvent* event)
 void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton) {
-        traceMousePosition(event->position());
+        const QPointF mousePosition = event->position();
+        if ((0.f <= mousePosition.x() && mousePosition.x() <= static_cast<double>(width())) &&
+            (0.f <= mousePosition.y() && mousePosition.y() <= static_cast<double>(height()))) {
+            traceMousePosition(mousePosition);
 
-        emit mouseMoved(event->position());
+            emit mouseMoved(mousePosition);
+        }
     }
     QWindow::mouseMoveEvent(event);
 }
