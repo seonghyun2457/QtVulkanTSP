@@ -38,8 +38,8 @@ private slots:
     void displayPerformace();
 
     // Row & Column slot
-    void setRowCount(const int iIndex);
-    void setColumnCount(const int iIndex);
+    void on_cbRow_activated(const int iIndex);
+    void on_cbCol_activated(const int iIndex);
 private:
     void initializeGuiWidgets();
     void initializeVulkanWidget();

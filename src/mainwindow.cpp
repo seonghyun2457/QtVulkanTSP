@@ -3,6 +3,7 @@
 
 #include <QVulkanWindow>
 
+#include <QColorDialog>
 #include <QPlainTextEdit>
 #include <QDebug>
 
@@ -65,14 +66,14 @@ void MainWindow::displayPerformace()
     setWindowTitle(m_performaceMessage.arg(m_cpuFps, 0, 'f', 3).arg(cpuMsPerFrame, 0, 'f', 3).arg(gpuFpsEquiv, 0, 'f', 3).arg(m_gpuTime, 0, 'f', 3));
 }
 
-void MainWindow::setRowCount(const int iIndex)
+void MainWindow::on_cbRow_activated(const int iIndex)
 {
     bool ok = false;
     const uint32_t rowCount = m_ui->cbRow->itemText(iIndex).toUInt(&ok);
     if (ok) emit transferRowCount(rowCount);
 }
 
-void MainWindow::setColumnCount(const int iIndex)
+void MainWindow::on_cbCol_activated(const int iIndex)
 {
     bool ok = false;
     const uint32_t columnCount = m_ui->cbCol->itemText(iIndex).toUInt(&ok);
@@ -82,8 +83,6 @@ void MainWindow::setColumnCount(const int iIndex)
 void MainWindow::initializeGuiWidgets()
 {
     // CONNECT
-    connect(m_ui->cbRow, &QComboBox::activated, this, &MainWindow::setRowCount);
-    connect(m_ui->cbCol, &QComboBox::activated, this, &MainWindow::setColumnCount);
     connect(this, &MainWindow::transferRowCount, m_pVulkanWidget, &VulkanWidget::setRowCount);
     connect(this, &MainWindow::transferColumnCount, m_pVulkanWidget, &VulkanWidget::setColumnCount);
 
@@ -118,8 +117,8 @@ void MainWindow::initializeVulkanWidget()
     connect(m_pVulkanWidget, &VulkanWidget::cpuFpsUpdated, this, &MainWindow::updateCpuFps);
 
     // - Mouse events
-    connect(m_pVulkanWidget,  &VulkanWidget::mousePressed, this, &MainWindow::onMousePressed);
-    connect(m_pVulkanWidget,  &VulkanWidget::mouseMoved, this, &MainWindow::onMouseMoved);
+    connect(m_pVulkanWidget, &VulkanWidget::mousePressed, this, &MainWindow::onMousePressed);
+    connect(m_pVulkanWidget, &VulkanWidget::mouseMoved, this, &MainWindow::onMouseMoved);
 
 
     qDebug() << "m_pVulkanWidget->width(): " << m_pVulkanWidget->width();
