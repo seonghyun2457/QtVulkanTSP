@@ -69,55 +69,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="gbNodeSettings">
+         <widget class="GroupNodeColor" name="gbNodeColor">
           <property name="title">
-           <string>Node settings</string>
+           <string>Node Colors</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0">
-            <widget class="QRadioButton" name="rbStartingNode">
-             <property name="text">
-              <string>Starting node</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QRadioButton" name="rbBlockingNode">
-             <property name="text">
-              <string>Blocking node</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QRadioButton" name="rbEndingNode">
-             <property name="text">
-              <string>Ending node</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="ColorSwatch" name="csStartingNode" native="true"/>
-           </item>
-           <item row="1" column="1">
-            <widget class="ColorSwatch" name="csEndingNode" native="true"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="ColorSwatch" name="csBlockingingNode" native="true"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QRadioButton" name="rbMovableNode">
-             <property name="text">
-              <string>Movable node</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="ColorSwatch" name="csMovableNode" native="true"/>
-           </item>
-          </layout>
+          <layout class="QGridLayout" name="gridLayout"/>
          </widget>
         </item>
         <item>
@@ -175,15 +131,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorSwatch</class>
-   <extends>QWidget</extends>
-   <header location="global">colorswatch.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GroupSolver</class>
    <extends>QGroupBox</extends>
    <header location="global">GroupSolver.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GroupNodeColor</class>
+   <extends>QGroupBox</extends>
+   <header location="global">GroupNodeColor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -17,9 +17,10 @@ MainWindow::MainWindow(QWidget* parent)
 {
     m_ui->setupUi(this);
 
+    // Initialize
     initializeVulkanWidget();
     initializeGuiWidgets();
-    initializeColorSwatch();
+    initializeGroupColor();
     initializeSolver();
 }
 
@@ -83,28 +84,9 @@ void MainWindow::on_cbCol_activated(const int iIndex)
     if (ok) emit transferColumnSize(columnSize);
 }
 
-void MainWindow::on_rbStartingNode_clicked()
+void MainWindow::nodeStatusSelected(const eNodeStatus iNodeStatus)
 {
-    displayDebugInfo("eNodeStatus::startingNode");
-    m_pVulkanWidget->setSelectedNodeStatus(eNodeStatus::startingNode);
-}
-
-void MainWindow::on_rbEndingNode_clicked()
-{
-    displayDebugInfo("eNodeStatus::endingNode");
-    m_pVulkanWidget->setSelectedNodeStatus(eNodeStatus::endingNode);
-}
-
-void MainWindow::on_rbBlockingNode_clicked()
-{
-    displayDebugInfo("eNodeStatus::blockingNode");
-    m_pVulkanWidget->setSelectedNodeStatus(eNodeStatus::blockingNode);
-}
-
-void MainWindow::on_rbMovableNode_clicked()
-{
-    displayDebugInfo("eNodeStatus::movableNode");
-    m_pVulkanWidget->setSelectedNodeStatus(eNodeStatus::movableNode);
+    m_pVulkanWidget->setSelectedNodeStatus(iNodeStatus);
 }
 
 void MainWindow::on_btnReset_clicked()
@@ -187,22 +169,13 @@ void MainWindow::initializeVulkanWidget()
     m_ui->vulkanWindow = pWindowContainer;
 }
 
-void MainWindow::initializeColorSwatch()
+void MainWindow::initializeGroupColor()
 {
     // CONNECT
-    connect(m_ui->csMovableNode, &ColorSwatch::colorSelcted, m_pVulkanWidget.get(), &VulkanWidget::setColorSetting);
-    connect(m_ui->csBlockingingNode, &ColorSwatch::colorSelcted, m_pVulkanWidget.get(), &VulkanWidget::setColorSetting);
-    connect(m_ui->csStartingNode, &ColorSwatch::colorSelcted, m_pVulkanWidget.get(), &VulkanWidget::setColorSetting);
-    connect(m_ui->csEndingNode, &ColorSwatch::colorSelcted, m_pVulkanWidget.get(), &VulkanWidget::setColorSetting);
+    connect(m_ui->gbNodeColor, &GroupNodeColor::nodeStatusSelected, this, &MainWindow::nodeStatusSelected);
+    connect(m_ui->gbNodeColor, &GroupNodeColor::colorSelcted, m_pVulkanWidget.get(), &VulkanWidget::setColorSetting);
 
-    // Set colors
-    m_ui->csMovableNode->initialize(eNodeStatus::movableNode, Qt::black);
-    m_ui->csBlockingingNode->initialize(eNodeStatus::blockingNode, Qt::red);
-    m_ui->csStartingNode->initialize(eNodeStatus::startingNode, Qt::yellow);
-    m_ui->csEndingNode->initialize(eNodeStatus::endingNode, Qt::green);
-
-    // Click Blocking button
-    m_ui->rbBlockingNode->click();
+    m_ui->gbNodeColor->initialize();
 }
 
 void MainWindow::initializeSolver()

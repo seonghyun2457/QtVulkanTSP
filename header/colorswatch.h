@@ -23,6 +23,7 @@ public:
     explicit ColorSwatch(QWidget *parent = nullptr);
     ~ColorSwatch();
     void initialize(const eNodeStatus iNodeStatus, const QColor iColor);
+    const eNodeStatus getNodeStatus() const;
 signals:
     void colorSelcted(const eNodeStatus iNodeStatus, const glm::vec3 iColor);
 

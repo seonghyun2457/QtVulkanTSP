@@ -35,6 +35,11 @@ void ColorSwatch::initialize(const eNodeStatus iNodeStatus, const QColor iColor)
     setColor(iColor);
 }
 
+const eNodeStatus ColorSwatch::getNodeStatus() const
+{
+    return m_nodeStatus;
+}
+
 void ColorSwatch::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {

@@ -37,7 +37,7 @@ public slots:
     void setRowSize(const uint32_t iRowSize);
     void setColumnSize(const uint32_t iColumnSize);
 
-    void setColorSetting(const eNodeStatus iNodeStatus, glm::vec3 iColor);
+    void setColorSetting(const eNodeStatus iNodeStatus, const glm::vec3 iColor);
     void changeNodeStatus(const uint32_t iIndex);
 
     void setSolver(const eSolver iSolver);

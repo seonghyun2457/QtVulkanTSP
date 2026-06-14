@@ -60,7 +60,7 @@ void VulkanWidget::setColumnSize(const uint32_t iColumnSize)
     resetNodes();
 }
 
-void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, glm::vec3 iColor)
+void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, const glm::vec3 iColor)
 {
     m_colors[iNodeStatus] = iColor;
 
@@ -78,13 +78,17 @@ void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
             m_nodes[m_startingNodeIndex].setNodeStatus(eNodeStatus::movableNode);
             m_nodes[m_startingNodeIndex].setColor(m_colors[eNodeStatus::movableNode]);
         }
+
         m_startingNodeIndex = iIndex;
+
     } else if (m_selectedNodeStatus == eNodeStatus::endingNode) {
         if (m_endingNodeIndex < m_nodes.size()) {
             m_nodes[m_endingNodeIndex].setNodeStatus(eNodeStatus::movableNode);
             m_nodes[m_endingNodeIndex].setColor(m_colors[eNodeStatus::movableNode]);
         }
+
         m_endingNodeIndex = iIndex;
+
     }
 
     m_nodes[iIndex].setNodeStatus(m_selectedNodeStatus);

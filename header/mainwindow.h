@@ -43,11 +43,8 @@ private slots:
     void on_cbRow_activated(const int iIndex);
     void on_cbCol_activated(const int iIndex);
 
-    // Node Status slots
-    void on_rbStartingNode_clicked();
-    void on_rbEndingNode_clicked();
-    void on_rbBlockingNode_clicked();
-    void on_rbMovableNode_clicked();
+    // Node Status slot
+    void nodeStatusSelected(const eNodeStatus iNodeStatus);
 
     // TSP slots
     void on_btnReset_clicked();
@@ -56,7 +53,7 @@ private slots:
 private:
     void initializeGuiWidgets();
     void initializeVulkanWidget();
-    void initializeColorSwatch();
+    void initializeGroupColor();
     void initializeSolver();
 
 private:
