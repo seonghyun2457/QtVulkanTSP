@@ -16,7 +16,7 @@ file(GLOB HEADERS "header/*.h")
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB UI_FILES "src/*.ui")
 
-#Add glm
+# Add glm
 add_subdirectory(externals/glm)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Gui)
@@ -24,11 +24,17 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Gui)
 qt_standard_project_setup()
 
 qt_add_executable(${PROJECT_NAME}
-    WIN32 MACOSX_BUNDLE
+    MACOSX_BUNDLE
     ${HEADERS}
     ${SOURCES}
     ${UI_FILES}
     ${SHADERS}
+)
+
+# Debug builds use the console subsystem so qDebug() output is visible in the console.
+# Other configurations (Release, etc.) build as a console-less GUI app (WIN32).
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    WIN32_EXECUTABLE "$<NOT:$<CONFIG:Debug>>"
 )
 
 target_link_libraries(${PROJECT_NAME}

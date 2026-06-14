@@ -1,17 +1,18 @@
 #ifndef TSPSOLVER_H
 #define TSPSOLVER_H
 
-#include <QObject>
+#include <vector>
 
-class TSPSolver : public QObject
+#include "node.h"
+#include "eSolver.h"
+
+class TSPSolver
 {
-    Q_OBJECT
 public:
-    TSPSolver();
-    virtual ~TSPSolver();
+    TSPSolver() = delete;
+    virtual ~TSPSolver() = delete;
 
-public slots:
-
+    static bool solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes);
 
 private:
 

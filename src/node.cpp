@@ -26,6 +26,8 @@ Node& Node::operator=(Node&& iOther) noexcept
         m_nodeStatus = iOther.m_nodeStatus;
         m_visited = iOther.m_visited;
     }
+
+    return *this;
 }
 
 const eNodeStatus Node::getNodeStatus() const

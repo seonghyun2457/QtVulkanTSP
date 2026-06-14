@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 
 #include "vulkanrenderer.h"
+#include "eSolver.h"
 
 class VulkanWidget : public QWindow
 {
@@ -13,7 +14,12 @@ public:
     VulkanWidget();
     virtual ~VulkanWidget();
 
+    void wipeScreen();
+
     void setSelectedNodeStatus(const eNodeStatus iNodeStatus);
+
+    void solve();
+
 signals:
     // Logging
     void sendVulkanInfo(const QString& iVulkanInfoString);
@@ -33,6 +39,8 @@ public slots:
 
     void setColorSetting(const eNodeStatus iNodeStatus, glm::vec3 iColor);
     void changeNodeStatus(const uint32_t iIndex);
+
+    void setSolver(const eSolver iSolver);
 
 protected:
     virtual void exposeEvent(QExposeEvent* event) override;
@@ -72,6 +80,9 @@ private:
     uint32_t m_endingNodeIndex{static_cast<uint32_t>(-1)};
     std::map<eNodeStatus, glm::vec3> m_colors;
     std::vector<Node> m_nodes;
+
+    bool m_screenBlocked{false};
+    eSolver m_solver{eSolver::Dijkstra};
 };
 
 #endif // VULKANWIDGET_H

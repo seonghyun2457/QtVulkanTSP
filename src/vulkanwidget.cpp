@@ -6,6 +6,8 @@
 #include <QExposeEvent>
 #include <QDebug>
 
+#include "tspsolver.h"
+
 VulkanWidget::VulkanWidget()
     : QWindow()
     , m_pVulkanRenderer(nullptr)
@@ -23,9 +25,29 @@ VulkanWidget::~VulkanWidget()
     qDebug() << "VulkanWidget destroyed";
 }
 
+void VulkanWidget::wipeScreen()
+{
+    m_screenBlocked = false;
+    m_startingNodeIndex = static_cast<uint32_t>(-1);
+    m_endingNodeIndex = static_cast<uint32_t>(-1);
+
+    for (size_t i = 0; i < m_nodes.size(); ++i) {
+        m_nodes[i].setNodeStatus(eNodeStatus::movableNode);
+        m_nodes[i].setColor(m_colors[eNodeStatus::movableNode]);
+        m_nodes[i].setVisited(false);
+    }
+}
+
 void VulkanWidget::setSelectedNodeStatus(const eNodeStatus iNodeStatus)
 {
     m_selectedNodeStatus = iNodeStatus;
+}
+
+void VulkanWidget::solve()
+{
+    bool solutionFound = TSPSolver::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes);
+
+    m_screenBlocked = true;
 }
 
 void VulkanWidget::setRowSize(const uint32_t iRowSize)
@@ -69,6 +91,11 @@ void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
 
     m_nodes[iIndex].setNodeStatus(m_selectedNodeStatus);
     m_nodes[iIndex].setColor(m_colors[m_selectedNodeStatus]);
+}
+
+void VulkanWidget::setSolver(const eSolver iSolver)
+{
+    m_solver = iSolver;
 }
 
 void VulkanWidget::exposeEvent(QExposeEvent* event)

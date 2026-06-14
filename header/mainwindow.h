@@ -25,11 +25,11 @@ signals:
     void transferColumnSize(const uint32_t iColumnSize);
 
 private slots:
-    // Logging slot
+    // Logging slots
     void displayVulkanInfo(const QString& iVulkanInfo);
     void displayDebugInfo(const QString& iDebugInfo);
 
-    // Mouse event slot
+    // Mouse event slots
     void onMousePressed(const QPointF& position);
     void onMouseMoved(const QPointF& position);
 
@@ -38,18 +38,22 @@ private slots:
     void updateCpuFps(const float iFps);
     void displayPerformace();
 
-    // Row & Column slot
+    // Row & Column slots
     void on_cbRow_activated(const int iIndex);
     void on_cbCol_activated(const int iIndex);
 
-    // Node Status slot
+    // Node Status slots
     void on_rbStartingNode_clicked();
     void on_rbEndingNode_clicked();
     void on_rbBlockingNode_clicked();
     void on_rbMovableNode_clicked();
 
-    // Test
-    //void on_btnColorDialog_clicked();
+    // TSP slots
+    void on_btnReset_clicked();
+    void on_btnSolve_clicked();
+    void setDijkstra();
+    void setAstar();
+
 private:
     void initializeGuiWidgets();
     void initializeVulkanWidget();
@@ -59,7 +63,6 @@ private:
 private:
     std::unique_ptr<Ui::MainWindow> m_ui;
     std::unique_ptr<VulkanWidget> m_pVulkanWidget{nullptr};
-    std::unique_ptr<TSPSolver> m_solver{nullptr};
 
     static constexpr uint32_t INITIAL_SIZE{2};
     static constexpr uint32_t MAX_ROW_SIZE{30};

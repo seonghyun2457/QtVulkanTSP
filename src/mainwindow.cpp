@@ -7,12 +7,13 @@
 #include <QPlainTextEdit>
 #include <QDebug>
 
+#include "eSolver.h"
+
 const QString MainWindow::s_performaceMessage = "Qt + Vulkan TSP - [CPU FPS: %1 (%2ms/frame), GPU FPS equiv: %3 (%4ms/frame)]";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_ui(std::make_unique<Ui::MainWindow>())
-    , m_solver(std::make_unique<TSPSolver>())
     , m_pVulkanWidget(std::make_unique<VulkanWidget>())
 {
     m_ui->setupUi(this);
@@ -25,10 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    qDebug() << "destroying m_solver";
-    m_solver = nullptr;
-    qDebug() << "destroyed m_solver";
-
     qDebug() << "destroying m_pVulkanWidget";
     m_pVulkanWidget = nullptr;
     qDebug() << "destroyed m_pVulkanWidget";
@@ -110,6 +107,28 @@ void MainWindow::on_rbMovableNode_clicked()
 {
     displayDebugInfo("eNodeStatus::movableNode");
     m_pVulkanWidget->setSelectedNodeStatus(eNodeStatus::movableNode);
+}
+
+void MainWindow::on_btnReset_clicked()
+{
+    displayDebugInfo("Reset");
+    m_pVulkanWidget->wipeScreen();
+}
+
+void MainWindow::on_btnSolve_clicked()
+{
+    displayDebugInfo("Solve");
+    m_pVulkanWidget->solve();
+}
+
+void MainWindow::setDijkstra()
+{
+    m_pVulkanWidget->setSolver(eSolver::Dijkstra);
+}
+
+void MainWindow::setAstar()
+{
+    m_pVulkanWidget->setSolver(eSolver::AStar);
 }
 
 void MainWindow::initializeGuiWidgets()
@@ -202,5 +221,6 @@ void MainWindow::initializeColorSwatch()
 
 void MainWindow::initializeSolver()
 {
-
+    connect(m_ui->rbSolverDijkstra, &QAbstractButton::clicked, this, &MainWindow::setDijkstra);
+    connect(m_ui->rbSolverDijkstra, &QAbstractButton::clicked, this, &MainWindow::setAstar);
 }

@@ -31,7 +31,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,8,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,8,0">
         <item>
          <widget class="QGroupBox" name="gbTspSize">
           <property name="title">
@@ -68,14 +68,14 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QRadioButton" name="solverAStar">
+            <widget class="QRadioButton" name="rbSolverAstar">
              <property name="text">
               <string>A*</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="solverDijkstra">
+            <widget class="QRadioButton" name="rbSolverDijkstra">
              <property name="text">
               <string>Dijkstra</string>
              </property>
@@ -137,18 +137,22 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btnColorDialog">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="btnReset">
+            <property name="text">
+             <string>Reset</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSolve">
+            <property name="text">
+             <string>Solve</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
