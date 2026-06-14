@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "vulkanwidget.h"
+#include "tspsolver.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,8 +21,8 @@ public:
     virtual ~MainWindow();
 
 signals:
-    void transferRowCount(const uint32_t iRowCount);
-    void transferColumnCount(const uint32_t iColumnCount);
+    void transferRowSize(const uint32_t iRowSize);
+    void transferColumnSize(const uint32_t iColumnSize);
 
 private slots:
     // Logging slot
@@ -41,19 +42,28 @@ private slots:
     void on_cbRow_activated(const int iIndex);
     void on_cbCol_activated(const int iIndex);
 
+    // Node Status slot
+    void on_rbStartingNode_clicked();
+    void on_rbEndingNode_clicked();
+    void on_rbBlockingNode_clicked();
+    void on_rbMovableNode_clicked();
+
     // Test
     //void on_btnColorDialog_clicked();
 private:
     void initializeGuiWidgets();
     void initializeVulkanWidget();
+    void initializeColorSwatch();
+    void initializeSolver();
 
 private:
     std::unique_ptr<Ui::MainWindow> m_ui;
-    VulkanWidget* m_pVulkanWidget;
+    std::unique_ptr<VulkanWidget> m_pVulkanWidget{nullptr};
+    std::unique_ptr<TSPSolver> m_solver{nullptr};
 
-    static constexpr size_t INITIAL_COUNT{2};
-    static constexpr size_t MAX_ROW_COUNT{30};
-    static constexpr size_t MAX_COLUMN_COUNT{40};
+    static constexpr uint32_t INITIAL_SIZE{2};
+    static constexpr uint32_t MAX_ROW_SIZE{30};
+    static constexpr uint32_t MAX_COLUMN_SIZE{40};
 
     // Performance Metrics
     QString m_performaceMessage{""};

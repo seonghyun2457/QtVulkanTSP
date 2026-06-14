@@ -36,10 +36,10 @@ public:
     const VkBuffer getVertexBuffer() const;
     const VkBuffer getIndexBuffer() const;
 
-private:
+protected:
     void destroyBuffers();
 
-private:
+protected:
     VulkanRenderer* m_renderer{nullptr};
     glm::mat4 m_model;
     glm::vec3 m_color;

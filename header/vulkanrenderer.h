@@ -8,6 +8,7 @@
 
 
 #include "Rectangle.h"
+#include "node.h"
 
 class VulkanWidget;
 
@@ -37,14 +38,14 @@ public:
     virtual ~VulkanRenderer();
 
     bool initialize();
-    void cleanup();
+    void cleanup(std::vector<Node>& iNodes);
 
     void recreateSwapChain();
 
-    void draw();
+    void draw(const std::vector<Node>& iNodes);
 
-    void resetPaths(const int iWidth, const int iHeight, const uint32_t iRowCount, const uint32_t iColCount, std::vector<bool>& oOccupied);
-    void paintRectangle(const size_t iIndex, const glm::vec3 iColor);
+    void resetNodes(const uint32_t iRowSize, const uint32_t iColSize, const glm::vec3 iColor, std::vector<Node>& oNodes);
+    void waitDeviceIdle();
 
     void createVertexBuffer(const std::vector<Vertex>& iVertices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
     void createIndexBuffer(const std::vector<uint32_t>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
@@ -77,7 +78,7 @@ private:
     void createDescriptorPool();
     void createDescriptorSets();
 
-    void recordCommands(const uint32_t iImageIndex, const std::vector<Rectangle>& iObjects);
+    void recordCommands(const uint32_t iImageIndex, const std::vector<Node>& iNodes);
     void updateUniformBuffers(const uint32_t iImageIndex);
 
     // Synchronization
@@ -116,9 +117,6 @@ private:
     bool extensionSupported(const char* iExtension) const;
 
 private:
-    // Drawbale objects
-    std::vector<Rectangle> m_objects;
-
     // Window
     VulkanWidget* m_window{nullptr};
 

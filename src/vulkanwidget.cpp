@@ -23,24 +23,38 @@ VulkanWidget::~VulkanWidget()
     qDebug() << "VulkanWidget destroyed";
 }
 
-void VulkanWidget::setRowCount(const uint32_t iRowCount)
+void VulkanWidget::setSelectedNodeStatus(const eNodeStatus iNodeStatus)
 {
-    m_rowCount = iRowCount;
-    sendDebugInfo("row count: " + QString::number(m_rowCount));
+    m_selectedNodeStatus = iNodeStatus;
+}
 
-    if (m_pVulkanRenderer && m_initisialized) {
-        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
+void VulkanWidget::setRowSize(const uint32_t iRowSize)
+{
+    m_rowSize = iRowSize;
+    resetNodes();
+}
+
+void VulkanWidget::setColumnSize(const uint32_t iColumnSize)
+{
+    m_colSize = iColumnSize;
+    resetNodes();
+}
+
+void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, glm::vec3 iColor)
+{
+    m_colors[iNodeStatus] = iColor;
+
+    for (Node& node : m_nodes) {
+        if (node.getNodeStatus() == iNodeStatus) {
+            node.setColor(m_colors[iNodeStatus]);
+        }
     }
 }
 
-void VulkanWidget::setColumnCount(const uint32_t iColumnCount)
+void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
 {
-    m_colCount = iColumnCount;
-    sendDebugInfo("column count: " + QString::number(m_colCount));
-
-    if (m_pVulkanRenderer && m_initisialized) {
-        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
-    }
+    m_nodes[iIndex].setNodeStatus(m_selectedNodeStatus);
+    m_nodes[iIndex].setColor(m_colors[m_selectedNodeStatus]);
 }
 
 void VulkanWidget::exposeEvent(QExposeEvent* event)
@@ -71,7 +85,7 @@ bool VulkanWidget::event(QEvent* e)
             if (m_pVulkanRenderer) {
                 emit sendDebugInfo("clean up");
                 m_initisialized = false;
-                m_pVulkanRenderer->cleanup();
+                m_pVulkanRenderer->cleanup(m_nodes);
             }
         }
     }
@@ -113,21 +127,17 @@ void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
 
 void VulkanWidget::traceMousePosition(const QPointF& iPosition)
 {
-    const float rectangleWidth = width() / static_cast<float>(m_colCount);
-    const float rectangleHeight = height() / static_cast<float>(m_rowCount);
+    const float rectangleWidth = width() / static_cast<float>(m_colSize);
+    const float rectangleHeight = height() / static_cast<float>(m_rowSize);
 
     const size_t rectangleColIndex = static_cast<size_t>(iPosition.x() / rectangleWidth);
     const size_t rectangleRowIndex = static_cast<size_t>(iPosition.y() / rectangleHeight);
 
-    const size_t index = (rectangleRowIndex * m_colCount) + rectangleColIndex;
+    const size_t index = (rectangleRowIndex * m_colSize) + rectangleColIndex;
 
-    if (m_occupied[index] == false) {
-        m_occupied[index] = true;
+    changeNodeStatus(index);
 
-        m_pVulkanRenderer->paintRectangle(index, glm::vec3(1.f, 1.f, 0.f));
-
-        emit sendDebugInfo("change Rectangle color");
-    }
+    emit sendDebugInfo("change Rectangle color");
 }
 
 void VulkanWidget::initializeRenderer()
@@ -143,8 +153,7 @@ void VulkanWidget::initializeRenderer()
     if (!m_initisialized) {
         emit sendDebugInfo("Failed to initialize Vulkan renderer");
     } else {
-        m_pVulkanRenderer->resetPaths(width(), height(), m_rowCount, m_colCount, m_occupied);
-
+        resetNodes();
         emit sendDebugInfo("Succeeded to initialize Vulkan renderer");
     };
 }
@@ -152,7 +161,7 @@ void VulkanWidget::initializeRenderer()
 void VulkanWidget::draw()
 {
     if (m_pVulkanRenderer && m_initisialized) {
-        m_pVulkanRenderer->draw();
+        m_pVulkanRenderer->draw(m_nodes);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -196,6 +205,13 @@ void VulkanWidget::updatePerformanceMetrics(const float iDeltaTime)
 
         // Reset timer
         m_gpuFpsUpdateTimer = 0.f;
+    }
+}
+
+void VulkanWidget::resetNodes()
+{
+    if (m_pVulkanRenderer != nullptr) {
+        m_pVulkanRenderer->resetNodes(m_rowSize, m_colSize, m_colors[eNodeStatus::movableNode], m_nodes);
     }
 }
 

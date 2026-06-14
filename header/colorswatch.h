@@ -4,6 +4,11 @@
 #include <QWidget>
 #include <QColor>
 
+// GLM
+#include <glm/glm.hpp>
+
+#include "eNodeStatus.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class ColorSwatch;
@@ -17,9 +22,9 @@ class ColorSwatch : public QWidget
 public:
     explicit ColorSwatch(QWidget *parent = nullptr);
     ~ColorSwatch();
-
+    void initialize(const eNodeStatus iNodeStatus, const QColor iColor);
 signals:
-    void clicked();
+    void colorSelcted(const eNodeStatus iNodeStatus, const glm::vec3 iColor);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -27,9 +32,12 @@ protected:
 private:
     void applyStyle();
     void changeColor();
+    void setColor(const QColor iColor);
 
 private:
+    eNodeStatus m_nodeStatus{eNodeStatus::movableNode};
     QColor m_color{Qt::black};
+
 };
 
 #endif // COLORSWATCH_H

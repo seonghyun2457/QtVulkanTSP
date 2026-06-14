@@ -29,6 +29,12 @@ ColorSwatch::~ColorSwatch()
 
 }
 
+void ColorSwatch::initialize(const eNodeStatus iNodeStatus, const QColor iColor)
+{
+    m_nodeStatus = iNodeStatus;
+    setColor(iColor);
+}
+
 void ColorSwatch::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
@@ -55,7 +61,15 @@ void ColorSwatch::changeColor()
 {
     const QColor newColor = QColorDialog::getColor(m_color, this);
     if (newColor.isValid()) {
-        m_color = newColor;
-        applyStyle();
+        setColor(newColor);
     }
+}
+
+void ColorSwatch::setColor(const QColor iColor)
+{
+    m_color = iColor;
+    applyStyle();
+
+    glm::vec3 color(m_color.redF(), m_color.greenF(), m_color.blueF());
+    emit colorSelcted(m_nodeStatus, color);
 }

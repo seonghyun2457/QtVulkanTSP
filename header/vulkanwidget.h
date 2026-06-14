@@ -5,7 +5,6 @@
 #include <QMouseEvent>
 
 #include "vulkanrenderer.h"
-#include "rectangle.h"
 
 class VulkanWidget : public QWindow
 {
@@ -14,6 +13,7 @@ public:
     VulkanWidget();
     virtual ~VulkanWidget();
 
+    void setSelectedNodeStatus(const eNodeStatus iNodeStatus);
 signals:
     // Logging
     void sendVulkanInfo(const QString& iVulkanInfoString);
@@ -28,8 +28,11 @@ signals:
     void cpuFpsUpdated(const float iCpuFps);
 
 public slots:
-    void setRowCount(const uint32_t iRowCount);
-    void setColumnCount(const uint32_t iColumnCount);
+    void setRowSize(const uint32_t iRowSize);
+    void setColumnSize(const uint32_t iColumnSize);
+
+    void setColorSetting(const eNodeStatus iNodeStatus, glm::vec3 iColor);
+    void changeNodeStatus(const uint32_t iIndex);
 
 protected:
     virtual void exposeEvent(QExposeEvent* event) override;
@@ -45,15 +48,15 @@ private:
     void initializeRenderer();
     void draw();
     void updatePerformanceMetrics(const float iDeltaTime);
+    void resetNodes();
 
 private:
     std::unique_ptr<VulkanRenderer> m_pVulkanRenderer;
     bool m_initisialized{false};
 
-    uint32_t m_rowCount{2};
-    uint32_t m_colCount{2};
-
-    std::vector<bool> m_occupied;
+    // Row, Column size
+    uint32_t m_rowSize{2};
+    uint32_t m_colSize{2};
 
     // Performace metrics
     static constexpr float FPS_UPDATE_INTERVAL_TIME{0.1f};
@@ -62,6 +65,13 @@ private:
     uint32_t m_cpuFrameSinceLastUpdate{0};
     float m_cpuFpsUpdateTimer{0.f};
     float m_gpuFpsUpdateTimer{0.f};
+
+    // Node
+    eNodeStatus m_selectedNodeStatus{eNodeStatus::movableNode};
+    uint32_t m_startingNodeIndex{static_cast<uint32_t>(-1)};
+    uint32_t m_endingNodeIndex{static_cast<uint32_t>(-1)};
+    std::map<eNodeStatus, glm::vec3> m_colors;
+    std::vector<Node> m_nodes;
 };
 
 #endif // VULKANWIDGET_H
