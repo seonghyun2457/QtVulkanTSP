@@ -1,11 +1,11 @@
-#include "tspsolver.h"
+#include "PathFinder.h"
 #include <queue>
 
 #include <QDebug>
 
 #include "eNodeStatus.h"
 
-bool TSPSolver::solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oPaths)
+bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oPaths)
 {
 
     bool solutionFound = false;
@@ -26,7 +26,7 @@ bool TSPSolver::solve(const eSolver iSolver, const uint32_t iStartingIndex, cons
     return solutionFound;
 }
 
-bool TSPSolver::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
+bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
 {
     std::vector<uint32_t> minDists(iNodes.size(), std::numeric_limits<uint32_t>::max());
     minDists[iStartingIndex] = 0;
@@ -121,7 +121,7 @@ bool TSPSolver::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIn
     return found;
 }
 
-bool TSPSolver::aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
+bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
 {
     return true;
 }

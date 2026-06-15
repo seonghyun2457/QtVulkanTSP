@@ -1,7 +1,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "vulkanrenderer.h"
+#include "Vulkanrenderer.h"
 
-#include "vulkanwidget.h"
+#include "Vulkanwidget.h"
 
 #include <QDir>
 #include <QtAssert>
@@ -1313,8 +1313,8 @@ void VulkanRenderer::createGraphicsPipeline()
 
     // HANDLE SHADERS
     // Read in SPIR-V code of shaders
-    std::vector<char> vertexShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanTSP/shaders/vert.spv");
-    std::vector<char> fragmentShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanTSP/shaders/frag.spv");
+    std::vector<char> vertexShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanPathFinder/shaders/vert.spv");
+    std::vector<char> fragmentShaderCode = readFile("C:/Users/ssh24/Documents/QtVulkanPathFinder/shaders/frag.spv");
 
     // Build shader modules to link to Graphics pipeline
     VkShaderModule vertexShaderModule = createShaderModule(vertexShaderCode);

@@ -35,7 +35,7 @@
         <item>
          <widget class="QGroupBox" name="gbTspSize">
           <property name="title">
-           <string>TSP size</string>
+           <string>Problem size</string>
           </property>
           <layout class="QFormLayout" name="formLayout">
            <item row="1" column="0">
@@ -64,7 +64,7 @@
         <item>
          <widget class="GroupSolver" name="gbSolver">
           <property name="title">
-           <string>solving algorithms</string>
+           <string>Solving algorithms</string>
           </property>
          </widget>
         </item>

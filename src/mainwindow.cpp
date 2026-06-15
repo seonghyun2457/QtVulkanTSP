@@ -8,7 +8,7 @@
 #include "eSolver.h"
 #include "ui_mainwindow.h"
 
-const QString MainWindow::s_performaceMessage = "Qt + Vulkan TSP - [CPU FPS: %1 (%2ms/frame), GPU FPS equiv: %3 (%4ms/frame)]";
+const QString MainWindow::s_performaceMessage = "Qt + Vulkan Pathfinder - [CPU FPS: %1 (%2ms/frame), GPU FPS equiv: %3 (%4ms/frame)]";
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)

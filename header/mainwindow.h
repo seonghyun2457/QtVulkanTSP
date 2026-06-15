@@ -5,8 +5,8 @@
 
 #include <QMainWindow>
 
-#include "tspsolver.h"
-#include "vulkanwidget.h"
+#include "PathFinder.h"
+#include "Vulkanwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

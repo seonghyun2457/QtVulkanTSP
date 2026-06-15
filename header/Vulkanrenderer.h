@@ -8,7 +8,7 @@
 
 
 #include "Rectangle.h"
-#include "node.h"
+#include "Node.h"
 
 class VulkanWidget;
 

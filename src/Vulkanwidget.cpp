@@ -1,4 +1,4 @@
-#include "vulkanwidget.h"
+#include "Vulkanwidget.h"
 
 #include <list>
 #include <QDebug>
@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "tspsolver.h"
+#include "PathFinder.h"
 
 VulkanWidget::VulkanWidget()
     : QWindow(), m_pVulkanRenderer(nullptr)
@@ -33,7 +33,6 @@ void VulkanWidget::wipeScreen()
     for (size_t i = 0; i < m_nodes.size(); ++i) {
         m_nodes[i].setNodeStatus(eNodeStatus::movableNode);
         m_nodes[i].setColor(m_colors[eNodeStatus::movableNode]);
-        m_nodes[i].setVisited(false);
     }
 
     sendDebugInfo(QString("Cleared screen. Screen is unblocked."));
@@ -51,7 +50,7 @@ void VulkanWidget::solve()
     sendDebugInfo(QString("Solve TSP problem. Solving algorithm: %1. Screen is blocked.").arg(static_cast<int>(m_solver)));
 
     std::list<uint32_t> pathIndices;
-    bool solutionFound = TSPSolver::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices);
+    bool solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices);
 
     if (solutionFound) {
         const float colorDiff = 1.f / static_cast<float>(pathIndices.size());

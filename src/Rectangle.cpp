@@ -1,8 +1,8 @@
-#include "rectangle.h"
+#include "Rectangle.h"
 
 #include <QtAssert>
 
-#include "vulkanrenderer.h"
+#include "Vulkanrenderer.h"
 
 Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight, const glm::vec3 iColor)
     : m_renderer(renderer)

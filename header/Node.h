@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "rectangle.h"
+#include "Rectangle.h"
 #include "eNodeStatus.h"
 
 class Node final : public Rectangle
@@ -19,11 +19,8 @@ public:
     const eNodeStatus getNodeStatus() const;
     void setNodeStatus(const eNodeStatus iNodeStatus);
 
-    const bool getVisited() const;
-    void setVisited(const bool iVisited);
 private:
     eNodeStatus m_nodeStatus{eNodeStatus::movableNode};
-    bool m_visited{false};
 };
 
 #endif // NODE_H

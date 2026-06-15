@@ -1,4 +1,4 @@
-#include "colorswatch.h"
+#include "Colorswatch.h"
 
 #include <qdebug.h>
 #include <QPalette>

@@ -1,6 +1,6 @@
 #include "GroupNodeColor.h"
 #include "ui_GroupNodeColor.h"
-#include "colorswatch.h"
+#include "Colorswatch.h"
 
 GroupNodeColor::GroupNodeColor(QWidget *parent)
     : QGroupBox(parent)
