@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>168</width>
-    <height>92</height>
+    <width>169</width>
+    <height>145</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,20 @@
    <string>Solving algorithms</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QRadioButton" name="rbBfs">
+     <property name="text">
+      <string>BFS</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="rbDfs">
+     <property name="text">
+      <string>DFS</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QRadioButton" name="rbAStar">
      <property name="text">

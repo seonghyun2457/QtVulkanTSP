@@ -8,20 +8,35 @@ GroupSolver::GroupSolver(QWidget* parent)
     ui->setupUi(this);
 
     // CONNECT
-    connect(ui->rbDijkstra, &QRadioButton::clicked, this, &GroupSolver::setDijkstra);
-    connect(ui->rbAStar, &QRadioButton::clicked, this, &GroupSolver::setAstar);
-
-    ui->rbDijkstra->click();
+    connect(ui->rbBfs, &QRadioButton::clicked, this, &GroupSolver::BfsClicked);
+    connect(ui->rbDfs, &QRadioButton::clicked, this, &GroupSolver::DfsClicked);
+    connect(ui->rbDijkstra, &QRadioButton::clicked, this, &GroupSolver::DijkstraClicked);
+    connect(ui->rbAStar, &QRadioButton::clicked, this, &GroupSolver::AstarClicked);
 }
 
 GroupSolver::~GroupSolver() {
     delete ui;
 }
 
-void GroupSolver::setDijkstra() {
+void GroupSolver::initialize()
+{
+    ui->rbDijkstra->click();
+}
+
+void GroupSolver::BfsClicked()
+{
+    emit solverChanged(eSolver::BFS);
+}
+
+void GroupSolver::DfsClicked()
+{
+    emit solverChanged(eSolver::DFS);
+}
+
+void GroupSolver::DijkstraClicked() {
     emit solverChanged(eSolver::Dijkstra);
 }
 
-void GroupSolver::setAstar() {
+void GroupSolver::AstarClicked() {
     emit solverChanged(eSolver::AStar);
 }

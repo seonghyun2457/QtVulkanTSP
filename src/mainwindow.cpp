@@ -181,4 +181,6 @@ void MainWindow::initializeGroupColor()
 void MainWindow::initializeSolver()
 {
     connect(m_ui->gbSolver, &GroupSolver::solverChanged, m_pVulkanWidget.get(), &VulkanWidget::setSolver);
+
+    m_ui->gbSolver->initialize();
 }

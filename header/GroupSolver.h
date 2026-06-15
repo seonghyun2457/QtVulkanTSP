@@ -18,9 +18,13 @@ public:
     explicit GroupSolver(QWidget* parent = nullptr);
     virtual ~GroupSolver();
 
+    void initialize();
+
 private:
-    void setDijkstra();
-    void setAstar();
+    void BfsClicked();
+    void DfsClicked();
+    void DijkstraClicked();
+    void AstarClicked();
 
 signals:
     void solverChanged(const eSolver iSolver);
