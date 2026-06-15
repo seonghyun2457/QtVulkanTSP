@@ -1,5 +1,6 @@
 #include "vulkanwidget.h"
 
+#include <list>
 #include <QDebug>
 #include <QExposeEvent>
 #include <glm/glm.hpp>
@@ -48,9 +49,22 @@ void VulkanWidget::setSelectedNodeStatus(const eNodeStatus iNodeStatus)
 void VulkanWidget::solve()
 {
     sendDebugInfo(QString("Solve TSP problem. Solving algorithm: %1. Screen is blocked.").arg(static_cast<int>(m_solver)));
-    bool solutionFound = TSPSolver::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes);
 
-    m_screenBlocked = true;
+    std::list<uint32_t> pathIndices;
+    bool solutionFound = TSPSolver::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices);
+
+    if (solutionFound) {
+        const float colorDiff = 1.f / static_cast<float>(pathIndices.size());
+        float factor = 0.f;
+
+        for (const uint32_t pathIndex : pathIndices) {
+            m_nodes[pathIndex].setColor(((1.f - factor) * m_colors[eNodeStatus::endingNode]) + (factor * m_colors[eNodeStatus::startingNode]));
+
+            factor += colorDiff;
+        }
+    }
+
+    m_screenBlocked = solutionFound ? true : false;
 }
 
 void VulkanWidget::setRowSize(const uint32_t iRowSize)

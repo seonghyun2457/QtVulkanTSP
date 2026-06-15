@@ -23,9 +23,9 @@ GroupNodeColor::~GroupNodeColor()
 void GroupNodeColor::initialize()
 {
     // Initialize
-    m_ui->csStartingNode->initialize(eNodeStatus::startingNode, Qt::yellow);
-    m_ui->csEndingNode->initialize(eNodeStatus::endingNode, Qt::green);
-    m_ui->csBlockingNode->initialize(eNodeStatus::blockingNode, Qt::red);
+    m_ui->csStartingNode->initialize(eNodeStatus::startingNode, Qt::green);
+    m_ui->csEndingNode->initialize(eNodeStatus::endingNode, Qt::red);
+    m_ui->csBlockingNode->initialize(eNodeStatus::blockingNode, Qt::white);
     m_ui->csMovableNode->initialize(eNodeStatus::movableNode, Qt::black);
 
     // Click Blocking button by default
