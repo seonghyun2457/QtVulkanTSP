@@ -1,7 +1,9 @@
 #include "PathFinder.h"
-#include <queue>
 
 #include <QDebug>
+#include <QMessageBox>
+
+#include <queue>
 
 #include "eNodeStatus.h"
 
@@ -11,6 +13,7 @@ bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, con
     bool solutionFound = false;
 
     if (!(iStartingIndex < iNodes.size() && iEndingIndex < iNodes.size())) {
+        QMessageBox::critical(nullptr, "", "Starting point and/or Ending point aren't set!");
         return solutionFound;
     }
 
@@ -28,6 +31,12 @@ bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, con
         break;
     default:
         qDebug() << "Undefined solver input.";
+    }
+
+    if (solutionFound) {
+        QMessageBox::information(nullptr, "", "Solution found!");
+    } else {
+        QMessageBox::critical(nullptr, "", "Solution not found!");
     }
 
     return solutionFound;

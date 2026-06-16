@@ -53,7 +53,8 @@ void VulkanWidget::solve()
     bool solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices);
 
     if (solutionFound) {
-        const float colorDiff = 1.f / static_cast<float>(pathIndices.size());
+        Q_ASSERT(pathIndices.size() >= 2);
+        const float colorDiff = 1.f / static_cast<float>(pathIndices.size() - 1);
         float factor = 0.f;
 
         for (const uint32_t pathIndex : pathIndices) {
