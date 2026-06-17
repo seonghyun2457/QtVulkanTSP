@@ -45,19 +45,18 @@ bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, con
 bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
 {
     bool found = false;
-    std::vector<uint32_t> distances(iNodes.size(), 0);
+    std::set<uint32_t> discovered;
 
     // to - from
     std::map<uint32_t, uint32_t> prevs;
 
     std::queue<uint32_t> queue;
     queue.push(iStartingIndex);
+    discovered.insert(iStartingIndex);
 
     while (!queue.empty()) {
         const uint32_t next = queue.front();
         queue.pop();
-
-        const uint32_t distance = distances[next];
 
         if (next == iEndingIndex) {
             found = true;
@@ -66,9 +65,9 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
 
         std::vector<uint32_t> neighborIndices = getNeighborIndices(iRowSize, iColumnSize, next, iNodes);
         for (const uint32_t neighbor : neighborIndices) {
-            if (distances[neighbor] == 0) {
+            if (discovered.find(neighbor) == discovered.end()) {
                 queue.push(neighbor);
-                distances[neighbor] = distance + 1;
+                discovered.insert(neighbor);
 
                 prevs[neighbor] = next;
             }
@@ -97,9 +96,13 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     return found;
 }
 
-bool PathFinder::dfs()
+bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
 {
-    return true;
+    bool found = false;
+
+
+
+    return found;
 }
 
 bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oPaths)
