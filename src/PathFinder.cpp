@@ -4,6 +4,7 @@
 #include <QMessageBox>
 
 #include <queue>
+#include <stack>
 
 #include "eNodeStatus.h"
 
@@ -22,6 +23,7 @@ bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, con
         solutionFound = bfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oPaths);
         break;
     case eSolver::DFS:
+        solutionFound = dfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oPaths);
         break;
     case eSolver::Dijkstra:
         solutionFound = dijkstra(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oPaths);
@@ -100,7 +102,52 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
 {
     bool found = false;
 
+    std::set<uint32_t> discovered;
+    // to - from
+    std::map<uint32_t, uint32_t> prevs;
+    std::stack<uint32_t> stack;
 
+    stack.push(iStartingIndex);
+    discovered.insert(iStartingIndex);
+
+    while (!stack.empty()) {
+        const uint32_t next = stack.top();
+        stack.pop();
+
+        if (next == iEndingIndex) {
+            found = true;
+            break;
+        }
+
+        std::vector<uint32_t> neighborIndices = getNeighborIndices(iRowSize, iColumnSize, next, iNodes);
+        for (const uint32_t neighbor : neighborIndices) {
+            if (discovered.find(neighbor) == discovered.end()) {
+                stack.push(neighbor);
+                discovered.insert(neighbor);
+
+                prevs[neighbor] = next;
+            }
+        }
+    }
+
+    uint32_t prevIndex = iEndingIndex;
+    oPaths.push_back(prevIndex);
+
+    while (prevs.find(prevIndex) != prevs.end()) {
+        uint32_t tmp = prevs[prevIndex];
+        prevIndex = tmp;
+
+        oPaths.push_back(prevIndex);
+
+        if (prevIndex == iStartingIndex) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        oPaths.clear();
+    }
 
     return found;
 }
