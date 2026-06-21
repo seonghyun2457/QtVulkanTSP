@@ -1,10 +1,14 @@
 #include "Vulkanwidget.h"
 
-#include <list>
 #include <QDebug>
 #include <QExposeEvent>
+#include <QMessageBox>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <list>
+#include <thread>
 
 #include "PathFinder.h"
 
@@ -31,8 +35,8 @@ void VulkanWidget::wipeScreen()
     m_endingNodeIndex = static_cast<uint32_t>(-1);
 
     for (size_t i = 0; i < m_nodes.size(); ++i) {
-        m_nodes[i].setNodeStatus(eNodeStatus::movableNode);
-        m_nodes[i].setColor(m_colors[eNodeStatus::movableNode]);
+        m_nodes[i].setNodeStatus(eNodeStatus::MovableNode);
+        m_nodes[i].setColor(m_colors[eNodeStatus::MovableNode]);
     }
 
     sendDebugInfo(QString("Cleared screen. Screen is unblocked."));
@@ -47,24 +51,64 @@ void VulkanWidget::setSelectedNodeStatus(const eNodeStatus iNodeStatus)
 
 void VulkanWidget::solve()
 {
+    bool solutionFound = false;
+
     sendDebugInfo(QString("Solve TSP problem. Solving algorithm: %1. Screen is blocked.").arg(static_cast<int>(m_solver)));
 
-    std::list<uint32_t> pathIndices;
-    bool solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices);
+    if (!(m_startingNodeIndex < m_nodes.size() && m_endingNodeIndex < m_nodes.size())) {
+        QMessageBox::critical(nullptr, "", "Starting point and/or Ending point aren't set!");
+        return;
+    }
 
-    if (solutionFound) {
+    std::list<uint32_t> pathIndices;
+    std::list<uint32_t> visitedIndices;
+    solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices, visitedIndices);
+
+    // Set color for visited nodes
+    {
+        const long long NANO_SECONDS_THRESHOLD = 250;
+        auto startTime = std::chrono::steady_clock ::now();
+        long long nanoSeconds = 0;
+
+        for (const uint32_t visitedIndex : visitedIndices) {
+            while (nanoSeconds < NANO_SECONDS_THRESHOLD) {
+                auto endTime = std::chrono::steady_clock ::now();
+                auto diffMilliSeconds = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime).count();
+                nanoSeconds += diffMilliSeconds;
+                startTime = endTime;
+
+                if (m_nodes[visitedIndex].getNodeStatus() != eNodeStatus::StartingNode && m_nodes[visitedIndex].getNodeStatus() != eNodeStatus::StartingNode) {
+                    m_nodes[visitedIndex].setColor(m_colors[eNodeStatus::VisitedNode]);
+                    draw();
+                }
+            }
+
+            nanoSeconds = 0;
+        }
+
+    }
+
+    if (!solutionFound) {
+        QMessageBox::critical(nullptr, "", "Solution not found!");
+        return;
+    }
+
+    // Set color for solution paths
+    {
         Q_ASSERT(pathIndices.size() >= 2);
         const float colorDiff = 1.f / static_cast<float>(pathIndices.size() - 1);
         float factor = 0.f;
 
         for (const uint32_t pathIndex : pathIndices) {
-            m_nodes[pathIndex].setColor(((1.f - factor) * m_colors[eNodeStatus::endingNode]) + (factor * m_colors[eNodeStatus::startingNode]));
+            m_nodes[pathIndex].setColor(((1.f - factor) * m_colors[eNodeStatus::EndingNode]) + (factor * m_colors[eNodeStatus::StartingNode]));
 
             factor += colorDiff;
         }
     }
 
-    m_screenBlocked = solutionFound ? true : false;
+    QMessageBox::information(nullptr, "", "Solution found!");
+
+    m_screenBlocked = true;
 }
 
 void VulkanWidget::setRowSize(const uint32_t iRowSize)
@@ -97,18 +141,18 @@ void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, const glm::vec
 
 void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
 {
-    if (m_selectedNodeStatus == eNodeStatus::startingNode) {
+    if (m_selectedNodeStatus == eNodeStatus::StartingNode) {
         if (m_startingNodeIndex < m_nodes.size()) {
-            m_nodes[m_startingNodeIndex].setNodeStatus(eNodeStatus::movableNode);
-            m_nodes[m_startingNodeIndex].setColor(m_colors[eNodeStatus::movableNode]);
+            m_nodes[m_startingNodeIndex].setNodeStatus(eNodeStatus::MovableNode);
+            m_nodes[m_startingNodeIndex].setColor(m_colors[eNodeStatus::MovableNode]);
         }
 
         m_startingNodeIndex = iIndex;
 
-    } else if (m_selectedNodeStatus == eNodeStatus::endingNode) {
+    } else if (m_selectedNodeStatus == eNodeStatus::EndingNode) {
         if (m_endingNodeIndex < m_nodes.size()) {
-            m_nodes[m_endingNodeIndex].setNodeStatus(eNodeStatus::movableNode);
-            m_nodes[m_endingNodeIndex].setColor(m_colors[eNodeStatus::movableNode]);
+            m_nodes[m_endingNodeIndex].setNodeStatus(eNodeStatus::MovableNode);
+            m_nodes[m_endingNodeIndex].setColor(m_colors[eNodeStatus::MovableNode]);
         }
 
         m_endingNodeIndex = iIndex;
@@ -281,6 +325,6 @@ void VulkanWidget::updatePerformanceMetrics(const float iDeltaTime)
 void VulkanWidget::resetNodes()
 {
     if (m_pVulkanRenderer != nullptr) {
-        m_pVulkanRenderer->resetNodes(m_rowSize, m_colSize, m_colors[eNodeStatus::movableNode], m_nodes);
+        m_pVulkanRenderer->resetNodes(m_rowSize, m_colSize, m_colors[eNodeStatus::MovableNode], m_nodes);
     }
 }

@@ -75,7 +75,7 @@ private:
     float m_gpuFpsUpdateTimer{0.f};
 
     // Node
-    eNodeStatus m_selectedNodeStatus{eNodeStatus::movableNode};
+    eNodeStatus m_selectedNodeStatus{eNodeStatus::MovableNode};
     uint32_t m_startingNodeIndex{static_cast<uint32_t>(-1)};
     uint32_t m_endingNodeIndex{static_cast<uint32_t>(-1)};
     std::map<eNodeStatus, glm::vec3> m_colors;

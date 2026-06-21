@@ -2,10 +2,11 @@
 #define ENODESTATUS_H
 
 enum class eNodeStatus {
-    startingNode,
-    endingNode,
-    blockingNode,
-    movableNode
+    StartingNode,
+    EndingNode,
+    BlockingNode,
+    MovableNode,
+    VisitedNode
 };
 
 #endif // ENODESTATUS_H

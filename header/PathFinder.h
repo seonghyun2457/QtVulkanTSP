@@ -14,13 +14,26 @@ public:
     PathFinder() = delete;
     virtual ~PathFinder() = delete;
 
-    static bool solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths);
+    static bool solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                      const uint32_t iRowSize, const uint32_t iColumnSize,
+                      std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices);
 
 private:
-    static bool bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths);
-    static bool dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths);
-    static bool dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths);
-    static bool aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths);
+    static bool bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                    const uint32_t iRowSize, const uint32_t iColumnSize,
+                    std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices);
+
+    static bool dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                    const uint32_t iRowSize, const uint32_t iColumnSize,
+                    std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices);
+
+    static bool dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                         const uint32_t iRowSize, const uint32_t iColumnSize,
+                         std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices);
+
+    static bool aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                      const uint32_t iRowSize, const uint32_t iColumnSize,
+                      std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices);
 
     static std::vector<uint32_t> getNeighborIndices(const uint32_t iRowSize, const uint32_t iColumnSize, const uint32_t iNodeIndex, std::vector<Node>& iNodes);
     static const uint32_t getDistance(const std::pair<int32_t, int32_t> iSrcIndex2D, const std::pair<int32_t, int32_t> iDstIndex2D);

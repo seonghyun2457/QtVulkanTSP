@@ -20,7 +20,7 @@ public:
     void setNodeStatus(const eNodeStatus iNodeStatus);
 
 private:
-    eNodeStatus m_nodeStatus{eNodeStatus::movableNode};
+    eNodeStatus m_nodeStatus{eNodeStatus::MovableNode};
 };
 
 #endif // NODE_H

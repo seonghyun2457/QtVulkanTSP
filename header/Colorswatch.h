@@ -36,7 +36,7 @@ private:
     void setColor(const QColor iColor);
 
 private:
-    eNodeStatus m_nodeStatus{eNodeStatus::movableNode};
+    eNodeStatus m_nodeStatus{eNodeStatus::MovableNode};
     QColor m_color{Qt::black};
 
 };

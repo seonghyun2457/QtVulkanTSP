@@ -1,50 +1,41 @@
 #include "PathFinder.h"
 
 #include <QDebug>
-#include <QMessageBox>
 
 #include <queue>
 #include <stack>
 
 #include "eNodeStatus.h"
 
-bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths)
+bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                       const uint32_t iRowSize, const uint32_t iColumnSize,
+                       std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
 {
-
     bool solutionFound = false;
-
-    if (!(iStartingIndex < iNodes.size() && iEndingIndex < iNodes.size())) {
-        QMessageBox::critical(nullptr, "", "Starting point and/or Ending point aren't set!");
-        return solutionFound;
-    }
 
     switch (iSolver) {
     case eSolver::BFS:
-        solutionFound = bfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths);
+        solutionFound = bfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
         break;
     case eSolver::DFS:
-        solutionFound = dfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths);
+        solutionFound = dfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
         break;
     case eSolver::Dijkstra:
-        solutionFound = dijkstra(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths);
+        solutionFound = dijkstra(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
         break;
     case eSolver::AStar:
-        solutionFound = aStar(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths);
+        solutionFound = aStar(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
         break;
     default:
         qDebug() << "Undefined solver input.";
     }
 
-    if (solutionFound) {
-        QMessageBox::information(nullptr, "", "Solution found!");
-    } else {
-        QMessageBox::critical(nullptr, "", "Solution not found!");
-    }
-
     return solutionFound;
 }
 
-bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths)
+bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                     const uint32_t iRowSize, const uint32_t iColumnSize,
+                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
     std::set<uint32_t> discovered;
@@ -55,6 +46,7 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     std::queue<uint32_t> queue;
     queue.push(iStartingIndex);
     discovered.insert(iStartingIndex);
+    oVisitedIndices.push_back(iStartingIndex);
 
     while (!queue.empty()) {
         const uint32_t next = queue.front();
@@ -70,6 +62,7 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
             if (discovered.find(neighbor) == discovered.end()) {
                 queue.push(neighbor);
                 discovered.insert(neighbor);
+                oVisitedIndices.push_back(neighbor);
 
                 prevs[neighbor] = next;
             }
@@ -83,7 +76,9 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     return found;
 }
 
-bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths)
+bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                     const uint32_t iRowSize, const uint32_t iColumnSize,
+                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
 
@@ -94,6 +89,7 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
 
     stack.push(iStartingIndex);
     discovered.insert(iStartingIndex);
+    oVisitedIndices.push_back(iStartingIndex);
 
     while (!stack.empty()) {
         const uint32_t next = stack.top();
@@ -109,6 +105,7 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
             if (discovered.find(neighbor) == discovered.end()) {
                 stack.push(neighbor);
                 discovered.insert(neighbor);
+                oVisitedIndices.push_back(neighbor);
 
                 prevs[neighbor] = next;
             }
@@ -122,7 +119,9 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     return found;
 }
 
-bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths)
+bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                          const uint32_t iRowSize, const uint32_t iColumnSize,
+                          std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
     std::vector<uint32_t> minDists(iNodes.size(), std::numeric_limits<uint32_t>::max());
@@ -139,6 +138,7 @@ bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingI
     std::priority_queue<std::pair<uint32_t,uint32_t>, std::vector<std::pair<uint32_t,uint32_t>>,compare> open;
 
     open.push(std::pair<uint32_t, uint32_t>(iStartingIndex, 0));
+    oVisitedIndices.push_back(iStartingIndex);
 
     while (!open.empty()) {
         const std::pair<uint32_t, uint32_t> candidate = open.top();
@@ -176,6 +176,7 @@ bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingI
             prevs[neighborIndex] = candidateIndex;
 
             open.push(std::pair<uint32_t, uint32_t>{neighborIndex, newDist});
+            oVisitedIndices.push_back(neighborIndex);
         }
     }
 
@@ -186,7 +187,9 @@ bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingI
     return found;
 }
 
-bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex, const uint32_t iRowSize, const uint32_t iColumnSize, std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths)
+bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
+                       const uint32_t iRowSize, const uint32_t iColumnSize,
+                       std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
 
@@ -226,6 +229,7 @@ bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingInde
     std::priority_queue<std::pair<uint32_t, uint32_t>, std::vector<std::pair<uint32_t,uint32_t>>,compare> open;
 
     open.push(std::pair<uint32_t, uint32_t>(iStartingIndex, fns[iStartingIndex]));
+    oVisitedIndices.push_back(iStartingIndex);
 
     while (!open.empty()) {
         const std::pair<uint32_t, uint32_t> candidate = open.top();
@@ -250,6 +254,7 @@ bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingInde
             gns[neighborIndex] = newGn;
             fns[neighborIndex] = gns[neighborIndex] + hns[neighborIndex];
             open.push(std::pair<uint32_t, uint32_t>(neighborIndex, fns[neighborIndex]));
+            oVisitedIndices.push_back(neighborIndex);
 
             prevs[neighborIndex] = candidateIndex;
         }
@@ -270,25 +275,25 @@ std::vector<uint32_t> PathFinder::getNeighborIndices(const uint32_t iRowSize, co
 
     // Left neighbor
     std::pair<uint32_t, uint32_t> leftNeighbor(index2D.first - 1, index2D.second);
-    if (leftNeighbor.first < iColumnSize && iNodes[leftNeighbor.second * iColumnSize  + leftNeighbor.first].getNodeStatus() != eNodeStatus::blockingNode) {
+    if (leftNeighbor.first < iColumnSize && iNodes[leftNeighbor.second * iColumnSize  + leftNeighbor.first].getNodeStatus() != eNodeStatus::BlockingNode) {
         neighborIndices.push_back(leftNeighbor.second * iColumnSize  + leftNeighbor.first);
     }
 
     // Right neighbor
     std::pair<uint32_t, uint32_t> rightNeighbor(index2D.first + 1, index2D.second);
-    if (rightNeighbor.first < iColumnSize && iNodes[rightNeighbor.second * iColumnSize  + rightNeighbor.first].getNodeStatus() != eNodeStatus::blockingNode) {
+    if (rightNeighbor.first < iColumnSize && iNodes[rightNeighbor.second * iColumnSize  + rightNeighbor.first].getNodeStatus() != eNodeStatus::BlockingNode) {
         neighborIndices.push_back(rightNeighbor.second * iColumnSize  + rightNeighbor.first);
     }
 
     // Upper neighbor
     std::pair<uint32_t, uint32_t> upperNeighbor(index2D.first, index2D.second - 1);
-    if (upperNeighbor.second < iRowSize && iNodes[upperNeighbor.second * iColumnSize  + upperNeighbor.first].getNodeStatus() != eNodeStatus::blockingNode) {
+    if (upperNeighbor.second < iRowSize && iNodes[upperNeighbor.second * iColumnSize  + upperNeighbor.first].getNodeStatus() != eNodeStatus::BlockingNode) {
         neighborIndices.push_back(upperNeighbor.second * iColumnSize  + upperNeighbor.first);
     }
 
     // Bottom neighbor
     std::pair<uint32_t, uint32_t> bottomNeighbor(index2D.first, index2D.second + 1);
-    if (bottomNeighbor.second < iRowSize && iNodes[bottomNeighbor.second * iColumnSize  + bottomNeighbor.first].getNodeStatus() != eNodeStatus::blockingNode) {
+    if (bottomNeighbor.second < iRowSize && iNodes[bottomNeighbor.second * iColumnSize  + bottomNeighbor.first].getNodeStatus() != eNodeStatus::BlockingNode) {
         neighborIndices.push_back(bottomNeighbor.second * iColumnSize  + bottomNeighbor.first);
     }
 
