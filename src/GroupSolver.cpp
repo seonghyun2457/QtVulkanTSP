@@ -20,7 +20,7 @@ GroupSolver::~GroupSolver() {
 
 void GroupSolver::initialize()
 {
-    ui->rbDijkstra->click();
+    ui->rbBfs->click();
 }
 
 void GroupSolver::BfsClicked()

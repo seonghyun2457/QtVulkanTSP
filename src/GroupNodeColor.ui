@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>170</width>
-    <height>113</height>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item row="1" column="0">
     <widget class="QRadioButton" name="rbEndingNode">
      <property name="text">
-      <string>ending node</string>
+      <string>Ending node</string>
      </property>
     </widget>
    </item>

@@ -28,8 +28,8 @@ void GroupNodeColor::initialize()
     m_ui->csBlockingNode->initialize(eNodeStatus::blockingNode, Qt::white);
     m_ui->csMovableNode->initialize(eNodeStatus::movableNode, Qt::black);
 
-    // Click Blocking button by default
-    m_ui->rbBlockingNode->click();
+    // Click Starting button by default
+    m_ui->rbStartingNode->click();
 }
 
 void GroupNodeColor::on_rbStartingNode_clicked()
