@@ -28,15 +28,27 @@ VulkanWidget::~VulkanWidget()
     qDebug() << "VulkanWidget destroyed";
 }
 
+void VulkanWidget::setMaxProblemSize(const uint32_t iMaxRowSize, const uint32_t iMaxColumnSize)
+{
+    m_maxRowSize = iMaxRowSize;
+    m_maxColumnSize = iMaxColumnSize;
+
+    m_rowSize = m_maxRowSize;
+    m_columnSize = m_maxColumnSize;
+    m_problemSize = m_rowSize * m_columnSize;
+}
+
 void VulkanWidget::clearScreen()
 {
     m_screenBlocked = false;
     m_startingNodeIndex = static_cast<uint32_t>(-1);
     m_endingNodeIndex = static_cast<uint32_t>(-1);
 
-    for (size_t i = 0; i < m_nodes.size(); ++i) {
-        m_nodes[i].setNodeStatus(eNodeStatus::MovableNode);
-        m_nodes[i].setColor(m_colors[eNodeStatus::MovableNode]);
+    if (m_pVulkanRenderer != nullptr) {
+        for (size_t i = 0; i < m_problemSize; ++i) {
+            m_nodes[i].setNodeStatus(eNodeStatus::MovableNode);
+            m_nodes[i].setColor(m_colors[eNodeStatus::MovableNode]);
+        }
     }
 
     sendDebugInfo(QString("Cleared screen. Screen is unblocked."));
@@ -46,7 +58,7 @@ void VulkanWidget::resetSolution()
 {
     m_screenBlocked = false;
 
-    for (size_t i = 0; i < m_nodes.size(); ++i) {
+    for (size_t i = 0; i < m_problemSize; ++i) {
         if (m_nodes[i].getNodeStatus() == eNodeStatus::MovableNode || m_nodes[i].getNodeStatus() == eNodeStatus::VisitedNode) {
             m_nodes[i].setNodeStatus(eNodeStatus::MovableNode);
             m_nodes[i].setColor(m_colors[eNodeStatus::MovableNode]);
@@ -69,14 +81,14 @@ void VulkanWidget::solve()
 
     sendDebugInfo(QString("Solve TSP problem. Solving algorithm: %1. Screen is blocked.").arg(static_cast<int>(m_solver)));
 
-    if (!(m_startingNodeIndex < m_nodes.size() && m_endingNodeIndex < m_nodes.size())) {
+    if (!(m_startingNodeIndex < m_problemSize && m_endingNodeIndex < m_problemSize)) {
         QMessageBox::critical(nullptr, "", "Starting point and/or Ending point aren't set!");
         return;
     }
 
     std::list<uint32_t> pathIndices;
     std::list<uint32_t> visitedIndices;
-    solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_colSize, m_nodes, pathIndices, visitedIndices);
+    solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_columnSize, m_nodes, pathIndices, visitedIndices);
 
     // Set color for visited nodes
     {
@@ -129,6 +141,7 @@ void VulkanWidget::solve()
 void VulkanWidget::setRowSize(const uint32_t iRowSize)
 {
     m_rowSize = iRowSize;
+    m_problemSize = m_rowSize * m_columnSize;
     resetNodes();
 
     sendDebugInfo(QString("Row size changed to %1").arg(m_rowSize));
@@ -136,10 +149,11 @@ void VulkanWidget::setRowSize(const uint32_t iRowSize)
 
 void VulkanWidget::setColumnSize(const uint32_t iColumnSize)
 {
-    m_colSize = iColumnSize;
+    m_columnSize = iColumnSize;
+    m_problemSize = m_rowSize * m_columnSize;
     resetNodes();
 
-    sendDebugInfo(QString("Column size changed to %1").arg(m_colSize));
+    sendDebugInfo(QString("Column size changed to %1").arg(m_columnSize));
 }
 
 void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, const glm::vec3 iColor)
@@ -157,7 +171,7 @@ void VulkanWidget::setColorSetting(const eNodeStatus iNodeStatus, const glm::vec
 void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
 {
     if (m_selectedNodeStatus == eNodeStatus::StartingNode) {
-        if (m_startingNodeIndex < m_nodes.size()) {
+        if (m_startingNodeIndex < m_problemSize) {
             m_nodes[m_startingNodeIndex].setNodeStatus(eNodeStatus::MovableNode);
             m_nodes[m_startingNodeIndex].setColor(m_colors[eNodeStatus::MovableNode]);
         }
@@ -165,16 +179,16 @@ void VulkanWidget::changeNodeStatus(const uint32_t iIndex)
         m_startingNodeIndex = iIndex;
 
     } else if (m_selectedNodeStatus == eNodeStatus::EndingNode) {
-        if (m_endingNodeIndex < m_nodes.size()) {
+        if (m_endingNodeIndex < m_problemSize) {
             m_nodes[m_endingNodeIndex].setNodeStatus(eNodeStatus::MovableNode);
             m_nodes[m_endingNodeIndex].setColor(m_colors[eNodeStatus::MovableNode]);
         }
 
         m_endingNodeIndex = iIndex;
     } else {
-        if (m_startingNodeIndex == iIndex && iIndex < m_nodes.size()) {
+        if (m_startingNodeIndex == iIndex && iIndex < m_problemSize) {
             m_startingNodeIndex = static_cast<uint32_t>(-1);
-        } else if(m_endingNodeIndex == iIndex && iIndex < m_nodes.size()) {
+        } else if(m_endingNodeIndex == iIndex && iIndex < m_problemSize) {
             m_endingNodeIndex = static_cast<uint32_t>(-1);
         }
     }
@@ -260,13 +274,13 @@ void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
 
 void VulkanWidget::traceMousePosition(const QPointF& iPosition)
 {
-    const float rectangleWidth = width() / static_cast<float>(m_colSize);
+    const float rectangleWidth = width() / static_cast<float>(m_columnSize);
     const float rectangleHeight = height() / static_cast<float>(m_rowSize);
 
     const size_t rectangleColIndex = static_cast<size_t>(iPosition.x() / rectangleWidth);
     const size_t rectangleRowIndex = static_cast<size_t>(iPosition.y() / rectangleHeight);
 
-    const size_t index = (rectangleRowIndex * m_colSize) + rectangleColIndex;
+    const size_t index = (rectangleRowIndex * m_columnSize) + rectangleColIndex;
 
     changeNodeStatus(index);
 }
@@ -284,7 +298,7 @@ void VulkanWidget::initializeRenderer()
     if (!m_initisialized) {
         emit sendDebugInfo("Failed to initialize Vulkan renderer");
     } else {
-        resetNodes();
+        createNodes();
         emit sendDebugInfo("Succeeded to initialize Vulkan renderer");
     };
 }
@@ -292,7 +306,7 @@ void VulkanWidget::initializeRenderer()
 void VulkanWidget::draw()
 {
     if (m_pVulkanRenderer && m_initisialized) {
-        m_pVulkanRenderer->draw(m_nodes);
+        m_pVulkanRenderer->draw(m_nodes, m_problemSize);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -339,7 +353,36 @@ void VulkanWidget::updatePerformanceMetrics(const float iDeltaTime)
 
 void VulkanWidget::resetNodes()
 {
+
     if (m_pVulkanRenderer != nullptr) {
-        m_pVulkanRenderer->resetNodes(m_rowSize, m_colSize, m_colors[eNodeStatus::MovableNode], m_nodes);
+        const float rectangleWidth = width() / static_cast<float>(m_columnSize);
+        const float rectangleHeight = height() / static_cast<float>(m_rowSize);
+
+
+        const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(m_columnSize);
+        const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(m_rowSize);
+
+        float halfWidth = 0.5f * width();
+        float halfHeight = 0.5f * height();
+
+        for (size_t i = 0; i < m_rowSize; ++i) {
+            for (size_t j = 0; j < m_columnSize; ++j) {
+                const size_t index = (i * m_columnSize) + j;
+
+                float normalizedXPos = (((j * rectangleWidth) - halfWidth) / static_cast<float>(halfWidth)) + normalizedRectangleHalfWidth;
+                float normalizedYPos = -((((i * rectangleHeight) - halfHeight) / static_cast<float>(halfHeight)) + normalizedRectangleHalfHeight);
+                glm::vec2 centerPos{normalizedXPos, normalizedYPos};
+
+                m_nodes[index].reset(centerPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight, eNodeStatus::MovableNode, m_colors[eNodeStatus::MovableNode]);
+            }
+        }
+    }
+}
+
+void VulkanWidget::createNodes()
+{
+    if (m_pVulkanRenderer != nullptr) {
+        m_pVulkanRenderer->createNodes(m_maxRowSize, m_maxColumnSize, m_colors[eNodeStatus::MovableNode], m_nodes);
+        resetNodes();
     }
 }

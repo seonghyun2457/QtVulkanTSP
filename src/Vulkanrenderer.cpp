@@ -276,7 +276,7 @@ void VulkanRenderer::recreateSwapChain()
     }
 }
 
-void VulkanRenderer::draw(const std::vector<Node>& iNodes)
+void VulkanRenderer::draw(const std::vector<Node>& iNodes, const size_t iDrawableNodeCount)
 {
 
     /*
@@ -302,7 +302,7 @@ void VulkanRenderer::draw(const std::vector<Node>& iNodes)
     vkAcquireNextImageKHR(m_logicalDevice, m_swapchain, std::numeric_limits<uint64_t>::max(), m_imagesAvailable[m_currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     // Update Uniform buffers
-    recordCommands(imageIndex, iNodes);
+    recordCommands(imageIndex, iNodes, iDrawableNodeCount);
     updateUniformBuffers(imageIndex);
 
     // SUBMIT COMMAND BUFFER TO RENDERER
@@ -349,23 +349,23 @@ void VulkanRenderer::draw(const std::vector<Node>& iNodes)
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void VulkanRenderer::resetNodes(const uint32_t iRowSize, const uint32_t iColSize, const glm::vec3 iColor, std::vector<Node>& oNodes)
+void VulkanRenderer::createNodes(const uint32_t iMaxRowSize, const uint32_t iMaxColumnSize, const glm::vec3 iColor, std::vector<Node>& oNodes)
 {
     waitDeviceIdle();
 
     oNodes.clear();
 
-    const float rectangleWidth = m_extent.width / static_cast<float>(iColSize);
-    const float rectangleHeight = m_extent.height / static_cast<float>(iRowSize);
+    const float rectangleWidth = m_extent.width / static_cast<float>(iMaxColumnSize);
+    const float rectangleHeight = m_extent.height / static_cast<float>(iMaxRowSize);
 
-    const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(iColSize);
-    const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(iRowSize);
+    const float normalizedRectangleHalfWidth = 1.f / static_cast<float>(iMaxColumnSize);
+    const float normalizedRectangleHalfHeight = 1.f / static_cast<float>(iMaxRowSize);
 
     float halfWidth = 0.5f * m_extent.width;
     float halfHeight = 0.5f * m_extent.height;
 
-    for (size_t i = 0; i < iRowSize; ++i) {
-        for (size_t j = 0; j < iColSize; ++j) {
+    for (size_t i = 0; i < iMaxRowSize; ++i) {
+        for (size_t j = 0; j < iMaxColumnSize; ++j) {
 
             float normalizedXPos = (((j * rectangleWidth) - halfWidth) / static_cast<float>(halfWidth)) + normalizedRectangleHalfWidth;
             float normalizedYPos = -((((i * rectangleHeight) - halfHeight) / static_cast<float>(halfHeight)) + normalizedRectangleHalfHeight);
@@ -376,7 +376,6 @@ void VulkanRenderer::resetNodes(const uint32_t iRowSize, const uint32_t iColSize
             oNodes.emplace_back(Node(this, recPos, normalizedRectangleHalfWidth, normalizedRectangleHalfHeight, iColor));
         }
     }
-
 }
 
 void VulkanRenderer::waitDeviceIdle()
@@ -388,7 +387,7 @@ void VulkanRenderer::waitDeviceIdle()
 }
 
 
-void VulkanRenderer::createVertexBuffer(const std::vector<Vertex>& iVertices,VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory)
+void VulkanRenderer::createVertexBuffer(const std::array<Vertex, 4>& iVertices,VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory)
 {
     Q_ASSERT(m_pDeviceFunctions != nullptr);
 
@@ -431,7 +430,7 @@ void VulkanRenderer::createVertexBuffer(const std::vector<Vertex>& iVertices,VkB
     destroyBufferMemory(stagingBufferMemory);
 }
 
-void VulkanRenderer::createIndexBuffer(const std::vector<uint32_t>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory)
+void VulkanRenderer::createIndexBuffer(const std::array<uint32_t, 6>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory)
 {
     Q_ASSERT(m_pDeviceFunctions != nullptr);
 
@@ -1023,7 +1022,7 @@ void VulkanRenderer::createDescriptorSets()
     }
 }
 
-void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vector<Node>& iNodes)
+void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vector<Node>& iNodes, const size_t iDrawableNodeCount)
 {
     Q_ASSERT(m_pDeviceFunctions != nullptr);
 
@@ -1113,7 +1112,7 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
 
             m_pDeviceFunctions->vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-            for (size_t i = 0; i < iNodes.size(); ++i) {
+            for (size_t i = 0; i < iDrawableNodeCount; ++i) {
 
                 // Bind mesh vertex buffer with 0 offset
                 std::array<VkBuffer, 1> vertexBuffer = { iNodes[i].getVertexBuffer() }; // Buffers to bind
@@ -1131,11 +1130,12 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
 
                 // Transfer pushConstantInfo_t to Fragment shader via PushConstant
                 pushConstantInfo_t pushConstInfo{};
-                pushConstInfo.color = glm::vec4(iNodes[i].getColor(), 1.f);    // Rectangle Color
-                pushConstInfo.borderColor = glm::vec4(0.3f, 0.3f, 0.3f, 0.4f); // Border Color
-                pushConstInfo.borderWidth = 0.05f;                             // Border Width
+                pushConstInfo.color = glm::vec4(iNodes[i].getColor(), 1.f);                                                    // Rectangle Color
+                pushConstInfo.borderColor = glm::vec4(0.3f, 0.3f, 0.3f, 0.4f);                                                 // Border Color
+                pushConstInfo.rect = glm::vec4(iNodes[i].getCenterPos(), iNodes[i].getHalfWidth(), iNodes[i].getHalfHeight()); // rectangle info
+                pushConstInfo.borderWidth = 0.05f;                                                                             // Border Width
 
-                m_pDeviceFunctions->vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(pushConstantInfo_t), &pushConstInfo);
+                m_pDeviceFunctions->vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(pushConstantInfo_t), &pushConstInfo);
 
                 // Draw by index
                 m_pDeviceFunctions->vkCmdDrawIndexed(commandBuffer, iNodes[i].getIndexCount(), 1, 0, 0, 0);
@@ -1297,7 +1297,7 @@ void VulkanRenderer::createDescriptorSetLayout()
 
 void VulkanRenderer::createPushConstantRange()
 {
-    m_pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // Send PushConstant to fragment shader
+    m_pushConstantRange.stageFlags =  VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // Send PushConstant to vertex shader and fragment shader
     m_pushConstantRange.offset = 0;
     m_pushConstantRange.size = sizeof(pushConstantInfo_t);
 }

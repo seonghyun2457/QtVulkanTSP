@@ -4,17 +4,14 @@
 
 #include "Vulkanrenderer.h"
 
-Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight, const glm::vec3 iColor)
+Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor)
     : m_renderer(renderer)
+    , m_centerPos(iCenterPos)
+    , m_halfWidth(iHalfWidth)
+    , m_halfHeight(iHalfHeight)
     , m_color(iColor)
 {
-    m_vertices = {
-                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y + halfHeight, 0.f), m_color, glm::vec2(0.f, 0.f)),  // 0
-                    Vertex(glm::vec3(iPos.x - halfWidth, iPos.y - halfHeight, 0.f), m_color, glm::vec2(0.f, 1.f)),  // 1
-                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y - halfHeight, 0.f), m_color, glm::vec2(1.f, 1.f)),  // 2
-                    Vertex(glm::vec3(iPos.x + halfWidth, iPos.y + halfHeight, 0.f), m_color, glm::vec2(1.f, 0.f))   // 3
-                 };
-
+    buildUnitQuad();
 
     m_indices = {0, 1, 2,
                  2, 3, 0};
@@ -35,6 +32,10 @@ Rectangle::~Rectangle()
 
 Rectangle::Rectangle(Rectangle&& iOther) noexcept
     : m_renderer(iOther.m_renderer)
+    , m_centerPos(iOther.m_centerPos)
+    , m_halfWidth(iOther.m_halfWidth)
+    , m_halfHeight(iOther.m_halfHeight)
+    , m_color(iOther.m_color)
     , m_model(iOther.m_model)
     , m_vertices(std::move(iOther.m_vertices))
     , m_indices(std::move(iOther.m_indices))
@@ -50,12 +51,31 @@ Rectangle::Rectangle(Rectangle&& iOther) noexcept
     iOther.m_indexBufferMemory = VK_NULL_HANDLE;
 }
 
+const glm::vec2 Rectangle::getCenterPos() const
+{
+    return m_centerPos;
+}
+
+const float Rectangle::getHalfWidth() const
+{
+    return m_halfWidth;
+}
+
+const float Rectangle::getHalfHeight() const
+{
+    return m_halfHeight;
+}
+
 Rectangle& Rectangle::operator=(Rectangle&& iOther) noexcept
 {
     if (this != &iOther) {
         if (m_renderer) destroyBuffers();
 
         m_renderer = iOther.m_renderer;
+        m_centerPos = iOther.m_centerPos;
+        m_halfWidth = iOther.m_halfWidth;
+        m_halfHeight = iOther.m_halfHeight;
+        m_color = iOther.m_color;
         m_model = iOther.m_model;
         m_vertices = std::move(iOther.m_vertices);
         m_indices = std::move(iOther.m_indices);
@@ -114,6 +134,14 @@ const VkBuffer Rectangle::getIndexBuffer() const
     return m_indexBuffer;
 }
 
+void Rectangle::resetVertices(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor)
+{
+    m_centerPos = iCenterPos;
+    m_halfWidth = iHalfWidth;
+    m_halfHeight = iHalfHeight;
+    m_color = iColor;
+}
+
 void Rectangle::destroyBuffers()
 {
     Q_ASSERT(m_renderer != nullptr);
@@ -125,5 +153,15 @@ void Rectangle::destroyBuffers()
     // clean up index buffer parts
     m_renderer->destroyBuffer(m_indexBuffer);
     m_renderer->destroyBufferMemory(m_indexBufferMemory);
+}
+
+void Rectangle::buildUnitQuad()
+{
+    m_vertices = {
+        Vertex(glm::vec3(-1.f,  1.f, 0.f), m_color, glm::vec2(0.f, 0.f)),  // 0 top-left
+        Vertex(glm::vec3(-1.f, -1.f, 0.f), m_color, glm::vec2(0.f, 1.f)),  // 1 bottom-left
+        Vertex(glm::vec3( 1.f, -1.f, 0.f), m_color, glm::vec2(1.f, 1.f)),  // 2 bottom-right
+        Vertex(glm::vec3( 1.f,  1.f, 0.f), m_color, glm::vec2(1.f, 0.f))   // 3 top-right
+    };
 }
 

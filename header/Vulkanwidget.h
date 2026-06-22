@@ -14,6 +14,8 @@ public:
     VulkanWidget();
     virtual ~VulkanWidget();
 
+    void setMaxProblemSize(const uint32_t iMaxRowSize, const uint32_t iMaxColumnSize);
+
     void clearScreen();
     void resetSolution();
 
@@ -58,14 +60,20 @@ private:
     void draw();
     void updatePerformanceMetrics(const float iDeltaTime);
     void resetNodes();
+    void createNodes();
 
 private:
     std::unique_ptr<VulkanRenderer> m_pVulkanRenderer;
     bool m_initisialized{false};
 
-    // Row, Column size
-    uint32_t m_rowSize{2};
-    uint32_t m_colSize{2};
+    // Max Row, Column size
+    uint32_t m_maxRowSize{1};
+    uint32_t m_maxColumnSize{1};
+
+    // Current Row, Column size
+    uint32_t m_rowSize{1};
+    uint32_t m_columnSize{1};
+    size_t m_problemSize{1};
 
     // Performace metrics
     static constexpr float FPS_UPDATE_INTERVAL_TIME{0.1f};

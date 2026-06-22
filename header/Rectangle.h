@@ -16,7 +16,7 @@ class VulkanRenderer;
 class Rectangle
 {
 public:
-    Rectangle(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeigh, const glm::vec3 iColor);
+    Rectangle(VulkanRenderer* renderer, const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor);
     virtual ~Rectangle();
 
     Rectangle(const Rectangle& iOther) = delete;
@@ -24,6 +24,10 @@ public:
 
     Rectangle(Rectangle&& iOther) noexcept;
     Rectangle& operator=(Rectangle&& iOther) noexcept;
+
+    const glm::vec2 getCenterPos() const;
+    const float getHalfWidth() const;
+    const float getHalfHeight() const;
 
     const glm::mat4 getModel() const;
     void setModel(const glm::mat4& iModel);
@@ -37,15 +41,24 @@ public:
     const VkBuffer getIndexBuffer() const;
 
 protected:
+    void resetVertices(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor);
     void destroyBuffers();
+
+
+private:
+    // Fills m_vertices with the local unit quad ([-1, 1] in x and y).
+    void buildUnitQuad();
 
 protected:
     VulkanRenderer* m_renderer{nullptr};
     glm::mat4 m_model;
+    glm::vec2 m_centerPos;
+    float m_halfWidth;
+    float m_halfHeight;
     glm::vec3 m_color;
 
-    std::vector<Vertex> m_vertices;
-    std::vector<uint32_t> m_indices;
+    std::array<Vertex, 4> m_vertices;
+    std::array<uint32_t, 6> m_indices;
 
     VkBuffer m_vertexBuffer{VK_NULL_HANDLE};
     VkDeviceMemory m_vertexBufferMemory{VK_NULL_HANDLE};

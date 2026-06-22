@@ -1,7 +1,7 @@
 #include "Node.h"
 
-Node::Node(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeigh, const glm::vec3 iColor)
-    : Rectangle(renderer, iPos, halfWidth, halfHeigh, iColor)
+Node::Node(VulkanRenderer* renderer, const glm::vec2& iPos, const float halfWidth, const float halfHeight, const glm::vec3 iColor)
+    : Rectangle(renderer, iPos, halfWidth, halfHeight, iColor)
 {
 
 }
@@ -36,4 +36,10 @@ const eNodeStatus Node::getNodeStatus() const
 void Node::setNodeStatus(const eNodeStatus iNodeStatus)
 {
     m_nodeStatus = iNodeStatus;
+}
+
+void Node::reset(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const eNodeStatus iNodeStatus, const glm::vec3 iColor)
+{
+    m_nodeStatus = iNodeStatus;
+    resetVertices(iCenterPos, iHalfWidth, iHalfHeight, iColor);
 }

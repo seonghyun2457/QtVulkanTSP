@@ -25,8 +25,9 @@ typedef struct SwapchainImage {
 } SwapchainImage_t;
 
 typedef struct {
-    glm::vec4 color{glm::vec4(0.f, 0.f, 0.f, 0.f)};  // COLOR: RGBA
+    glm::vec4 color{glm::vec4(0.f, 0.f, 0.f, 0.f)};        // COLOR: RGBA
     glm::vec4 borderColor{glm::vec4(0.f, 0.f, 0.f, 0.f)};
+    glm::vec4 rect{glm::vec4(0.f, 0.f, 0.f, 0.f)};         // xy = centerPosition, zw = half width/height
     float borderWidth{0.f};
 } pushConstantInfo_t;
 
@@ -42,13 +43,13 @@ public:
 
     void recreateSwapChain();
 
-    void draw(const std::vector<Node>& iNodes);
+    void draw(const std::vector<Node>& iNodes, const size_t iDrawableNodeCount);
 
-    void resetNodes(const uint32_t iRowSize, const uint32_t iColSize, const glm::vec3 iColor, std::vector<Node>& oNodes);
+    void createNodes(const uint32_t iMaxRowSize, const uint32_t iMaxColumnSize, const glm::vec3 iColor, std::vector<Node>& oNodes);
     void waitDeviceIdle();
 
-    void createVertexBuffer(const std::vector<Vertex>& iVertices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
-    void createIndexBuffer(const std::vector<uint32_t>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
+    void createVertexBuffer(const std::array<Vertex, 4>& iVertices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
+    void createIndexBuffer(const std::array<uint32_t, 6>& iIndices, VkBuffer& oBuffer, VkDeviceMemory& oBufferMemory);
     void destroyBuffer(VkBuffer& ioBuffer);
     void destroyBufferMemory(VkDeviceMemory& ioBufferMemory);
 
@@ -78,7 +79,7 @@ private:
     void createDescriptorPool();
     void createDescriptorSets();
 
-    void recordCommands(const uint32_t iImageIndex, const std::vector<Node>& iNodes);
+    void recordCommands(const uint32_t iImageIndex, const std::vector<Node>& iNodes, const size_t iDrawableNodeCount);
     void updateUniformBuffers(const uint32_t iImageIndex);
 
     // Synchronization

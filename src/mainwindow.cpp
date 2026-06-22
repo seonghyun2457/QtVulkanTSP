@@ -119,6 +119,8 @@ void MainWindow::initializeGuiWidgets()
     connect(this, &MainWindow::transferRowSize, m_pVulkanWidget.get(), &VulkanWidget::setRowSize);
     connect(this, &MainWindow::transferColumnSize, m_pVulkanWidget.get(), &VulkanWidget::setColumnSize);
 
+    m_pVulkanWidget->setMaxProblemSize(MAX_ROW_SIZE, MAX_COLUMN_SIZE);
+
     // initialize cbRow
     for (size_t i = INITIAL_SIZE; i <= MAX_ROW_SIZE; ++i) {
         m_ui->cbRow->addItem(QString::number(i));
@@ -129,9 +131,14 @@ void MainWindow::initializeGuiWidgets()
         m_ui->cbCol->addItem(QString::number(i));
     }
 
-    // Set initial Row/Column count
-    m_ui->cbRow->setCurrentIndex(m_ui->cbRow->count() - 1);
-    m_ui->cbCol->setCurrentIndex(m_ui->cbCol->count() - 1);
+    // Set initial Row/Column
+    {
+        m_ui->cbRow->setCurrentIndex(m_ui->cbRow->count() - 1);
+        m_ui->cbRow->activated(m_ui->cbRow->count() - 1);
+
+        m_ui->cbCol->setCurrentIndex(m_ui->cbCol->count() - 1);
+        m_ui->cbCol->activated(m_ui->cbCol->count() - 1);
+    }
 }
 
 void MainWindow::initializeVulkanWidget()

@@ -8,6 +8,7 @@ layout(location = 0) out vec4 outColor; // Final output color (must also have lo
 layout(std140, push_constant) uniform PushConstants {
 	vec4 color;
 	vec4 borderColor;
+	vec4 rect;          // xy = center, wz = half width/height size
 	float borderWidth;
 } pc;
 
