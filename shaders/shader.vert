@@ -1,6 +1,6 @@
 #version 450 // Use GLSL 4.5
 
-layout(location = 0) in vec3 pos; // Output color for vertex (location is required)
+layout(location = 0) in vec3 pos; // Local unit-quad position in [-1, 1]
 layout(location = 1) in vec3 col;
 layout(location = 2) in vec2 uv;
 
