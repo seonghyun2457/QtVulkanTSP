@@ -1,7 +1,6 @@
 #version 450
 
-layout(location = 0) in vec3 fragCol;
-layout(location = 1) in vec2 fragUv;
+layout(location = 0) in vec2 fragUv;
 
 layout(location = 0) out vec4 outColor; // Final output color (must also have location)
 

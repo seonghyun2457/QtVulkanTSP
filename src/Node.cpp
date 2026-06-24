@@ -41,5 +41,5 @@ void Node::setNodeStatus(const eNodeStatus iNodeStatus)
 void Node::reset(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const eNodeStatus iNodeStatus, const glm::vec3 iColor)
 {
     m_nodeStatus = iNodeStatus;
-    resetVertices(iCenterPos, iHalfWidth, iHalfHeight, iColor);
+    resetproperties(iCenterPos, iHalfWidth, iHalfHeight, iColor);
 }

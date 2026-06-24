@@ -1,8 +1,7 @@
 #version 450 // Use GLSL 4.5
 
 layout(location = 0) in vec3 pos; // Local unit-quad position in [-1, 1]
-layout(location = 1) in vec3 col;
-layout(location = 2) in vec2 uv;
+layout(location = 1) in vec2 uv;
 
 layout (std140, set = 0, binding = 0) uniform UboModelViewProjection {
 	mat4 model;
@@ -17,13 +16,12 @@ layout(std140, push_constant) uniform PushConstants {
 	float borderWidth;
 } pc;
 
-layout(location = 0) out vec3 fragCol;
-layout(location = 1) out vec2 fragUv;
+layout(location = 0) out vec2 fragUv;
 
 void main() 
 {
 	vec2 worldPos = pos.xy * pc.rect.zw + pc.rect.xy;
 	gl_Position = uboModelViewProjection.projection * uboModelViewProjection.view * uboModelViewProjection.model * vec4(worldPos, 0.0, 1.0);
-	fragCol = col;
+
 	fragUv = uv;
 }

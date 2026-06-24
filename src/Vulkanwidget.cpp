@@ -232,7 +232,7 @@ bool VulkanWidget::event(QEvent* e)
             if (m_pVulkanRenderer) {
                 emit sendDebugInfo("clean up");
                 m_initisialized = false;
-                m_pVulkanRenderer->cleanup(m_nodes);
+                m_pVulkanRenderer->cleanup();
             }
         }
     }

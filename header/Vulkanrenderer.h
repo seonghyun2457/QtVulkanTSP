@@ -39,7 +39,7 @@ public:
     virtual ~VulkanRenderer();
 
     bool initialize();
-    void cleanup(std::vector<Node>& iNodes);
+    void cleanup();
 
     void recreateSwapChain();
 
@@ -85,6 +85,10 @@ private:
     // Synchronization
     void createSynchronization();
 
+    // Rectangle buffer
+    void createRectangleBuffers();
+    void destroyRectangleBuffers();
+
     // Print information
     void printVulkanInfo(const QString& iString) const;
     void printDebugInfo(const QString& iString) const;
@@ -116,7 +120,6 @@ private:
 
     // Extension functions
     bool extensionSupported(const char* iExtension) const;
-
 private:
     // Window
     VulkanWidget* m_window{nullptr};
@@ -205,6 +208,25 @@ private:
 
     // - Descriptor sets
     std::vector<VkDescriptorSet> m_descriptorSets;
+
+    // - Rectangle buffer
+    struct {
+        // Fills m_vertices with the local unit quad ([-1, 1] in x and y).
+        std::array<Vertex, 4> m_vertices = {Vertex(glm::vec3(-1.f,  1.f, 0.f), glm::vec2(0.f, 0.f)),  // 0 top-left
+                                            Vertex(glm::vec3(-1.f, -1.f, 0.f), glm::vec2(0.f, 1.f)),  // 1 bottom-left
+                                            Vertex(glm::vec3( 1.f, -1.f, 0.f), glm::vec2(1.f, 1.f)),  // 2 bottom-right
+                                            Vertex(glm::vec3( 1.f,  1.f, 0.f), glm::vec2(1.f, 0.f))   // 3 top-right
+        };
+
+        std::array<uint32_t, 6> m_indices = {0, 1, 2,
+                                             2, 3, 0};
+
+        VkBuffer m_vertexBuffer{VK_NULL_HANDLE};
+        VkDeviceMemory m_vertexBufferMemory{VK_NULL_HANDLE};
+
+        VkBuffer m_indexBuffer{VK_NULL_HANDLE};
+        VkDeviceMemory m_indexBufferMemory{VK_NULL_HANDLE};
+    } m_rectangleBuffers;
 
 
     // - Synchronizaiton resources

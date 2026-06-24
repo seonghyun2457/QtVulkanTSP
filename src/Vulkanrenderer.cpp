@@ -83,27 +83,9 @@ bool VulkanRenderer::initialize()
             m_uboModelViewProjection.projection[1][1] *= -1.f;
         }
 
-        /*
-        {
-            std::vector<Vertex> vertices1 = {
-                                                Vertex(glm::vec3(-0.9f, 0.4f, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 0
-                                                Vertex(glm::vec3(-1.0f, -0.4f, 0.f), glm::vec3(1.f, 0.f, 0.f)),  // 1
-                                                Vertex(glm::vec3(-0.4f, -0.4f, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 2
-                                                Vertex(glm::vec3(-0.4f, 0.4f, 0.f),   glm::vec3(1.f, 0.f, 0.f))   // 3
-                                            };
+        // Create Rectangle buffers
+        createRectangleBuffers();
 
-            std::vector<Vertex> vertices2 = {
-                                                Vertex(glm::vec3(0.4f, 0.4f, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 0
-                                                Vertex(glm::vec3(0.4f, -0.4f, 0.f), glm::vec3(1.f, 0.f, 0.f)),  // 1
-                                                Vertex(glm::vec3(0.8f, -0.4f, 0.f),  glm::vec3(1.f, 0.f, 0.f)),  // 2
-                                                Vertex(glm::vec3(0.8f, 0.4f, 0.f),   glm::vec3(1.f, 0.f, 0.f))   // 3
-                                            };
-
-            m_objects.emplace_back(Rectangle(this, vertices1));
-            m_objects.emplace_back(Rectangle(this, vertices2));
-
-        }
-*/
     } catch (const std::runtime_error& e) {
         printDebugInfo(e.what());
         succeded = false;
@@ -112,13 +94,14 @@ bool VulkanRenderer::initialize()
     return succeded;
 }
 
-void VulkanRenderer::cleanup(std::vector<Node>& iNodes)
+void VulkanRenderer::cleanup()
 {
     Q_ASSERT(m_pDeviceFunctions != VK_NULL_HANDLE);
 
     waitDeviceIdle();
 
-    iNodes.clear();
+    // Destroy Rectangle buffers
+    destroyRectangleBuffers();
 
     // Destroy descriptor pool
     if (m_descriptorPool != VK_NULL_HANDLE) {
@@ -1113,14 +1096,13 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
             m_pDeviceFunctions->vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
             for (size_t i = 0; i < iDrawableNodeCount; ++i) {
-
                 // Bind mesh vertex buffer with 0 offset
-                std::array<VkBuffer, 1> vertexBuffer = { iNodes[i].getVertexBuffer() }; // Buffers to bind
-                std::array<VkDeviceSize, 1> offsets = { 0 };                              // Offsets into buffers being bound
-                m_pDeviceFunctions->vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffer.data(), offsets.data()); // Command to bind vertex buffer before drawing with that
+                std::array<VkBuffer, 1> vertexBuffer = { m_rectangleBuffers.m_vertexBuffer }; // Buffers to bind
+                std::array<VkDeviceSize, 1> offsets = { 0 };                                  // Offsets into buffers being bound
+                m_pDeviceFunctions->vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffer.size(), vertexBuffer.data(), offsets.data()); // Command to bind vertex buffer before drawing with that
 
                 // Bind mesh index buffer with 0 offset and using the uint32 type
-                m_pDeviceFunctions->vkCmdBindIndexBuffer(commandBuffer, iNodes[i].getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                m_pDeviceFunctions->vkCmdBindIndexBuffer(commandBuffer, m_rectangleBuffers.m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
                 // Bind Descriptor sets (for Uniform Buffer ModelViewProjection)
                 m_pDeviceFunctions->vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout,
@@ -1138,7 +1120,7 @@ void VulkanRenderer::recordCommands(const uint32_t iImageIndex, const std::vecto
                 m_pDeviceFunctions->vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(pushConstantInfo_t), &pushConstInfo);
 
                 // Draw by index
-                m_pDeviceFunctions->vkCmdDrawIndexed(commandBuffer, iNodes[i].getIndexCount(), 1, 0, 0, 0);
+                m_pDeviceFunctions->vkCmdDrawIndexed(commandBuffer, m_rectangleBuffers.m_indices.size(), 1, 0, 0, 0);
             }
         }
 
@@ -1297,7 +1279,7 @@ void VulkanRenderer::createDescriptorSetLayout()
 
 void VulkanRenderer::createPushConstantRange()
 {
-    m_pushConstantRange.stageFlags =  VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // Send PushConstant to vertex shader and fragment shader
+    m_pushConstantRange.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT  | VK_SHADER_STAGE_FRAGMENT_BIT; // Send PushConstant to vertex shader and fragment shader
     m_pushConstantRange.offset = 0;
     m_pushConstantRange.size = sizeof(pushConstantInfo_t);
 }
@@ -1348,7 +1330,7 @@ void VulkanRenderer::createGraphicsPipeline()
         vertexbindingDescption.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // How to move between data after each vertex
 
         // How the data for an attribute is defined within a vertex
-        std::array<VkVertexInputAttributeDescription, 3> vertexInputAttributesDescripotions;
+        std::array<VkVertexInputAttributeDescription, 2> vertexInputAttributesDescripotions;
 
         // Position attribute
         // layout(location = 0) in vec3 pos in Vertex Shader
@@ -1357,19 +1339,12 @@ void VulkanRenderer::createGraphicsPipeline()
         vertexInputAttributesDescripotions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Formate the data will take (also helps to define the size of data). 12 bytes.
         vertexInputAttributesDescripotions[0].offset = offsetof(Vertex, pos);      // Where this attribute is defined in the data for a single vertex
 
-        // Color attribute
-        // layout(location = 1) in vec3 pos in Vertex Shader
-        vertexInputAttributesDescripotions[1].binding = 0;                         // Which binding the data is at (should be same as above)
-        vertexInputAttributesDescripotions[1].location = 1;                        // Location in shader where data will be read from
-        vertexInputAttributesDescripotions[1].format = VK_FORMAT_R32G32B32_SFLOAT; // Formate the data will take (also helps to define the size of data). 12 bytes.
-        vertexInputAttributesDescripotions[1].offset = offsetof(Vertex, col);      // Where this attribute is defined in the data for a single vertex
-
         // UV attribute
-        // layout(location = 2) in vec2 uv in Vertex Shader
-        vertexInputAttributesDescripotions[2].binding = 0;
-        vertexInputAttributesDescripotions[2].location = 2;
-        vertexInputAttributesDescripotions[2].format = VK_FORMAT_R32G32_SFLOAT; // 8 bytes for UV
-        vertexInputAttributesDescripotions[2].offset = offsetof(Vertex, uv);
+        // layout(location = 1) in vec2 uv in Vertex Shader
+        vertexInputAttributesDescripotions[1].binding = 0;
+        vertexInputAttributesDescripotions[1].location = 1;
+        vertexInputAttributesDescripotions[1].format = VK_FORMAT_R32G32_SFLOAT; // 8 bytes for UV
+        vertexInputAttributesDescripotions[1].offset = offsetof(Vertex, uv);
 
         // VERTEX INPUT STATE
         VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
@@ -1597,6 +1572,24 @@ void VulkanRenderer::createSynchronization()
             throw std::runtime_error("Failed to create semamphores");
         }
     }
+}
+
+void VulkanRenderer::createRectangleBuffers()
+{
+    createVertexBuffer(m_rectangleBuffers.m_vertices, m_rectangleBuffers.m_vertexBuffer, m_rectangleBuffers.m_vertexBufferMemory);
+    createIndexBuffer(m_rectangleBuffers.m_indices, m_rectangleBuffers.m_indexBuffer, m_rectangleBuffers.m_indexBufferMemory);
+}
+
+void VulkanRenderer::destroyRectangleBuffers()
+{
+
+    // clean up vertex buffer parts
+    destroyBuffer(m_rectangleBuffers.m_vertexBuffer);
+    destroyBufferMemory(m_rectangleBuffers.m_vertexBufferMemory);
+
+    // clean up index buffer parts
+    destroyBuffer(m_rectangleBuffers.m_indexBuffer);
+    destroyBufferMemory(m_rectangleBuffers.m_indexBufferMemory);
 }
 
 void VulkanRenderer::printVulkanInfo(const QString &iString) const

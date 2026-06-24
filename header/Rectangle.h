@@ -7,7 +7,6 @@
 
 struct Vertex {
     glm::vec3 pos; // Vertex position (x, y, z)
-    glm::vec3 col; // Vertex color (r, g, b)
     glm::vec2 uv;
 };
 
@@ -35,36 +34,16 @@ public:
     const glm::vec3 getColor() const;
     void setColor(const glm::vec3& iColor);
 
-    const uint32_t getIndexCount() const;
+protected:
+    void resetproperties(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor);
 
-    const VkBuffer getVertexBuffer() const;
-    const VkBuffer getIndexBuffer() const;
 
 protected:
-    void resetVertices(const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor);
-    void destroyBuffers();
-
-
-private:
-    // Fills m_vertices with the local unit quad ([-1, 1] in x and y).
-    void buildUnitQuad();
-
-protected:
-    VulkanRenderer* m_renderer{nullptr};
     glm::mat4 m_model;
     glm::vec2 m_centerPos;
     float m_halfWidth;
     float m_halfHeight;
     glm::vec3 m_color;
-
-    std::array<Vertex, 4> m_vertices;
-    std::array<uint32_t, 6> m_indices;
-
-    VkBuffer m_vertexBuffer{VK_NULL_HANDLE};
-    VkDeviceMemory m_vertexBufferMemory{VK_NULL_HANDLE};
-
-    VkBuffer m_indexBuffer{VK_NULL_HANDLE};
-    VkDeviceMemory m_indexBufferMemory{VK_NULL_HANDLE};
 };
 
 #endif // RECTANGLE_H
