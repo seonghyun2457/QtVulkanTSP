@@ -16,7 +16,7 @@ public:
 
     void setMaxProblemSize(const uint32_t iMaxRowSize, const uint32_t iMaxColumnSize);
 
-    void clearScreen();
+    void clearWindow();
     void resetSolution();
 
     void setSelectedNodeStatus(const eNodeStatus iNodeStatus);
@@ -61,6 +61,7 @@ private:
     void updatePerformanceMetrics(const float iDeltaTime);
     void resetNodes();
     void createNodes();
+    bool checkWindowBlocked();
 
 private:
     std::unique_ptr<VulkanRenderer> m_pVulkanRenderer;
@@ -90,7 +91,7 @@ private:
     std::map<eNodeStatus, glm::vec3> m_colors;
     std::vector<Node> m_nodes;
 
-    bool m_screenBlocked{false};
+    bool m_isWindowBlocked{false};
     eSolver m_solver{eSolver::Dijkstra};
 };
 

@@ -8,7 +8,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <list>
-#include <thread>
 
 #include "PathFinder.h"
 
@@ -38,9 +37,9 @@ void VulkanWidget::setMaxProblemSize(const uint32_t iMaxRowSize, const uint32_t 
     m_problemSize = m_rowSize * m_columnSize;
 }
 
-void VulkanWidget::clearScreen()
+void VulkanWidget::clearWindow()
 {
-    m_screenBlocked = false;
+    m_isWindowBlocked = false;
     m_startingNodeIndex = static_cast<uint32_t>(-1);
     m_endingNodeIndex = static_cast<uint32_t>(-1);
 
@@ -51,12 +50,12 @@ void VulkanWidget::clearScreen()
         }
     }
 
-    sendDebugInfo(QString("Cleared screen. Screen is unblocked."));
+    sendDebugInfo(QString("Window cleared. Window is unblocked."));
 }
 
 void VulkanWidget::resetSolution()
 {
-    m_screenBlocked = false;
+    m_isWindowBlocked = false;
 
     for (size_t i = 0; i < m_problemSize; ++i) {
         if (m_nodes[i].getNodeStatus() == eNodeStatus::MovableNode || m_nodes[i].getNodeStatus() == eNodeStatus::VisitedNode) {
@@ -140,7 +139,7 @@ void VulkanWidget::solve()
 
     QMessageBox::information(nullptr, "", "Solution found!");
 
-    m_screenBlocked = true;
+    m_isWindowBlocked = true;
 }
 
 void VulkanWidget::setRowSize(const uint32_t iRowSize)
@@ -255,7 +254,11 @@ void VulkanWidget::resizeEvent(QResizeEvent* event)
 
 void VulkanWidget::mousePressEvent(QMouseEvent* event)
 {
-    if (!m_screenBlocked && (event->button() == Qt::LeftButton)) {
+    if (checkWindowBlocked()) {
+        return;
+    }
+
+    if (event->button() == Qt::LeftButton) {
         traceMousePosition(event->position());
 
         emit mousePressed(event->position());
@@ -265,7 +268,11 @@ void VulkanWidget::mousePressEvent(QMouseEvent* event)
 
 void VulkanWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    if (!m_screenBlocked && (event->buttons() & Qt::LeftButton)) {
+    if (event->buttons() & Qt::LeftButton) {
+        if (checkWindowBlocked()) {
+            return;
+        }
+
         const QPointF mousePosition = event->position();
         if ((0.f <= mousePosition.x() && mousePosition.x() <= static_cast<double>(width())) &&
             (0.f <= mousePosition.y() && mousePosition.y() <= static_cast<double>(height()))) {
@@ -390,4 +397,12 @@ void VulkanWidget::createNodes()
         m_pVulkanRenderer->createNodes(m_maxRowSize, m_maxColumnSize, m_colors[eNodeStatus::MovableNode], m_nodes);
         resetNodes();
     }
+}
+
+bool VulkanWidget::checkWindowBlocked()
+{
+    if (m_isWindowBlocked) {
+        QMessageBox::critical(nullptr, "", "Window is blocked! Click Reset or Clear button to unblock.");
+    }
+    return m_isWindowBlocked;
 }

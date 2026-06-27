@@ -112,7 +112,7 @@ void MainWindow::on_btnReset_clicked()
 void MainWindow::on_btnClear_clicked()
 {
     displayDebugInfo("Clear button clicked");
-    m_pVulkanWidget->clearScreen();
+    m_pVulkanWidget->clearWindow();
 }
 
 void MainWindow::initializeGuiWidgets()
