@@ -69,8 +69,8 @@ private:
 
     // Problem size definitions
     static constexpr uint32_t INITIAL_SIZE{2};
-    static constexpr uint32_t MAX_ROW_SIZE{30};
-    static constexpr uint32_t MAX_COLUMN_SIZE{40};
+    static constexpr uint32_t MAX_ROW_SIZE{40};
+    static constexpr uint32_t MAX_COLUMN_SIZE{50};
 
     // Performance Metrics
     static const QString s_performaceMessage;
