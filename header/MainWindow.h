@@ -6,7 +6,7 @@
 #include <QMainWindow>
 
 #include "PathFinder.h"
-#include "Vulkanwidget.h"
+#include "VulkanWidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

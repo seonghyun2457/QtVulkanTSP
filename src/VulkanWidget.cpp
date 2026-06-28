@@ -1,4 +1,4 @@
-#include "Vulkanwidget.h"
+#include "VulkanWidget.h"
 
 #include <QDebug>
 #include <QExposeEvent>

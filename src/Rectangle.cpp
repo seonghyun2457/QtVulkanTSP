@@ -2,7 +2,7 @@
 
 #include <QtAssert>
 
-#include "Vulkanrenderer.h"
+#include "VulkanRenderer.h"
 
 Rectangle::Rectangle(VulkanRenderer* renderer, const glm::vec2 iCenterPos, const float iHalfWidth, const float iHalfHeight, const glm::vec3 iColor)
     : m_centerPos(iCenterPos)

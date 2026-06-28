@@ -1,7 +1,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "Vulkanrenderer.h"
+#include "VulkanRenderer.h"
 
-#include "Vulkanwidget.h"
+#include "VulkanWidget.h"
 
 #include <QDir>
 #include <QtAssert>

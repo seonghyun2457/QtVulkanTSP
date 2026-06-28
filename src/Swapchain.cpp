@@ -2,7 +2,7 @@
 
 #include <QVulkanFunctions>
 
-#include "Vulkanwidget.h"
+#include "VulkanWidget.h"
 
 Swapchain::Swapchain(VulkanWidget* iPVulkanWidget, QVulkanInstance* iPqvulkanInstance, const VkPhysicalDevice* iPphysicalDevice, const VkDevice* iPLogicalDevice)
     : m_pVulkanWidget(iPVulkanWidget)

@@ -4,7 +4,7 @@
 #include <QWindow>
 #include <QMouseEvent>
 
-#include "Vulkanrenderer.h"
+#include "VulkanRenderer.h"
 #include "eSolver.h"
 
 class VulkanWidget : public QWindow

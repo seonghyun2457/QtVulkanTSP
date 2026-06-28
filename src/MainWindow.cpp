@@ -1,11 +1,11 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 
 #include <QColorDialog>
 #include <QDebug>
 #include <QPlainTextEdit>
 #include <QVulkanWindow>
 
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 
 const QString MainWindow::s_performaceMessage = "Qt + Vulkan Pathfinder - [CPU FPS: %1 (%2ms/frame), GPU FPS equiv: %3 (%4ms/frame)]";
 
