@@ -58,7 +58,7 @@ void VulkanWidget::resetSolution()
     m_isWindowBlocked = false;
 
     for (size_t i = 0; i < m_problemSize; ++i) {
-        if (m_nodes[i].getNodeStatus() == eNodeStatus::MovableNode || m_nodes[i].getNodeStatus() == eNodeStatus::VisitedNode) {
+        if (m_nodes[i].getNodeStatus() == eNodeStatus::MovableNode || m_nodes[i].getNodeStatus() == eNodeStatus::VisitedNode || m_nodes[i].getNodeStatus() == eNodeStatus::SolutionNode) {
             m_nodes[i].setNodeStatus(eNodeStatus::MovableNode);
             m_nodes[i].setColor(m_colors[eNodeStatus::MovableNode]);
         }
@@ -92,9 +92,9 @@ void VulkanWidget::solve()
         return;
     }
 
-    std::list<uint32_t> pathIndices;
+    std::list<uint32_t> solutionIndices;
     std::list<uint32_t> visitedIndices;
-    solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_columnSize, m_nodes, pathIndices, visitedIndices);
+    solutionFound = PathFinder::solve(m_solver, m_startingNodeIndex, m_endingNodeIndex, m_rowSize, m_columnSize, m_nodes, solutionIndices, visitedIndices);
 
     // Set color for visited nodes
     {
@@ -128,13 +128,15 @@ void VulkanWidget::solve()
 
     // Set color for solution paths
     {
-        Q_ASSERT(pathIndices.size() >= 2);
-        const float colorDiff = 1.f / static_cast<float>(pathIndices.size() - 1);
+        Q_ASSERT(solutionIndices.size() >= 2);
+        const float colorDiff = 1.f / static_cast<float>(solutionIndices.size() - 1);
         float factor = 0.f;
 
-        for (const uint32_t pathIndex : pathIndices) {
-            m_nodes[pathIndex].setColor(((1.f - factor) * m_colors[eNodeStatus::EndingNode]) + (factor * m_colors[eNodeStatus::StartingNode]));
-
+        for (const uint32_t solutionIndex : solutionIndices) {
+            if ((solutionIndex != m_startingNodeIndex) && (solutionIndex != m_endingNodeIndex)) {
+                m_nodes[solutionIndex].setNodeStatus(eNodeStatus::SolutionNode);
+                m_nodes[solutionIndex].setColor(((1.f - factor) * m_colors[eNodeStatus::EndingNode]) + (factor * m_colors[eNodeStatus::StartingNode]));
+            }
             factor += colorDiff;
         }
     }

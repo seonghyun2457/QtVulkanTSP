@@ -9,22 +9,22 @@
 
 bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, const uint32_t iEndingIndex,
                        const uint32_t iRowSize, const uint32_t iColumnSize,
-                       std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
+                       std::vector<Node>& iNodes, std::list<uint32_t>& oSolutionIndicess, std::list<uint32_t>& oVisitedIndices)
 {
     bool solutionFound = false;
 
     switch (iSolver) {
     case eSolver::BFS:
-        solutionFound = bfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
+        solutionFound = bfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionIndicess, oVisitedIndices);
         break;
     case eSolver::DFS:
-        solutionFound = dfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
+        solutionFound = dfs(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionIndicess, oVisitedIndices);
         break;
     case eSolver::Dijkstra:
-        solutionFound = dijkstra(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
+        solutionFound = dijkstra(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionIndicess, oVisitedIndices);
         break;
     case eSolver::AStar:
-        solutionFound = aStar(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionPaths, oVisitedIndices);
+        solutionFound = aStar(iStartingIndex, iEndingIndex, iRowSize, iColumnSize, iNodes, oSolutionIndicess, oVisitedIndices);
         break;
     default:
         qDebug() << "Undefined solver input.";
@@ -35,7 +35,7 @@ bool PathFinder::solve(const eSolver iSolver, const uint32_t iStartingIndex, con
 
 bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
                      const uint32_t iRowSize, const uint32_t iColumnSize,
-                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
+                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionIndices, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
     std::set<uint32_t> discovered;
@@ -70,7 +70,7 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     }
 
     if (found) {
-        storeSolution(prevs, iEndingIndex, oSolutionPaths);
+        storeSolution(prevs, iEndingIndex, oSolutionIndices);
     }
 
     return found;
@@ -78,7 +78,7 @@ bool PathFinder::bfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
 
 bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
                      const uint32_t iRowSize, const uint32_t iColumnSize,
-                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
+                     std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionIndices, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
 
@@ -114,7 +114,7 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
     }
 
     if (found) {
-        storeSolution(prevs, iEndingIndex, oSolutionPaths);
+        storeSolution(prevs, iEndingIndex, oSolutionIndices);
     }
 
     return found;
@@ -122,7 +122,7 @@ bool PathFinder::dfs(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
 
 bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
                           const uint32_t iRowSize, const uint32_t iColumnSize,
-                          std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
+                          std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionIndices, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
     std::vector<uint32_t> minDists(iNodes.size(), std::numeric_limits<uint32_t>::max());
@@ -180,7 +180,7 @@ bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingI
     }
 
     if (found) {
-        storeSolution(prevs, iEndingIndex, oSolutionPaths);
+        storeSolution(prevs, iEndingIndex, oSolutionIndices);
     }
 
     return found;
@@ -188,7 +188,7 @@ bool PathFinder::dijkstra(const uint32_t iStartingIndex, const uint32_t iEndingI
 
 bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingIndex,
                        const uint32_t iRowSize, const uint32_t iColumnSize,
-                       std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionPaths, std::list<uint32_t>& oVisitedIndices)
+                       std::vector<Node> &iNodes, std::list<uint32_t>& oSolutionIndices, std::list<uint32_t>& oVisitedIndices)
 {
     bool found = false;
 
@@ -262,7 +262,7 @@ bool PathFinder::aStar(const uint32_t iStartingIndex, const uint32_t iEndingInde
     }
 
     if (found) {
-        storeSolution(prevs, iEndingIndex, oSolutionPaths);
+        storeSolution(prevs, iEndingIndex, oSolutionIndices);
     }
 
     return found;
@@ -311,18 +311,18 @@ const std::pair<uint32_t, uint32_t> PathFinder::getIndex2D(const uint32_t iColum
     return std::pair<uint32_t, uint32_t>(iIndex % iColumnSize, iIndex / iColumnSize);
 }
 
-void PathFinder::storeSolution(const std::map<uint32_t, uint32_t> &iPrevs, const uint32_t iEndingIndex, std::list<uint32_t>& oSolutionPaths)
+void PathFinder::storeSolution(const std::map<uint32_t, uint32_t> &iPrevs, const uint32_t iEndingIndex, std::list<uint32_t>& oSolutionIndices)
 {
 
     uint32_t prevIndex = iEndingIndex;
-    oSolutionPaths.push_back(prevIndex);
+    oSolutionIndices.push_back(prevIndex);
 
     auto it = iPrevs.find(prevIndex);
     while (it != iPrevs.end()) {
         const uint32_t tmp = it->second;
         prevIndex = tmp;
 
-        oSolutionPaths.push_back(prevIndex);
+        oSolutionIndices.push_back(prevIndex);
 
         it = iPrevs.find(prevIndex);
     }

@@ -8,6 +8,7 @@ An interactive grid pathfinding visualizer built with **Qt6** and rendered throu
 
 - **Four pathfinding algorithms** — Breadth-First Search (BFS), Depth-First Search (DFS), A\*, and Dijkstra, selectable at runtime.
 - **Vulkan-rendered grid** — every cell is drawn as a quad through a hand-rolled Vulkan renderer and swapchain, with live CPU FPS and GPU timing reported in the window title bar.
+- **Gradient solution path** — once the goal is reached, the reconstructed shortest path is marked with a dedicated `SolutionNode` status and rendered as a smooth color gradient that fades from the ending node's color to the starting node's color along the route.
 - **Interactive editing** — paint and erase nodes with the mouse to design arbitrary mazes and obstacle layouts.
 - **Configurable problem size** — choose the grid dimensions up to **40 rows × 50 columns**.
 - **Customizable node colors** — recolor any node type (start, end, wall, movable, visited) via a standard color picker.
@@ -16,10 +17,15 @@ An interactive grid pathfinding visualizer built with **Qt6** and rendered throu
 ## How it works
 
 The grid is a flat `std::vector<Node>`, each `Node` carrying an `eNodeStatus`
-(`StartingNode`, `EndingNode`, `BlockingNode`, `MovableNode`, `VisitedNode`).
-`PathFinder::solve()` dispatches to the chosen `eSolver` and returns both the
-solution path and the list of visited indices, which the renderer colors on the
-grid.
+(`StartingNode`, `EndingNode`, `BlockingNode`, `MovableNode`, `VisitedNode`,
+`SolutionNode`). `PathFinder::solve()` dispatches to the chosen `eSolver` and
+returns both the solution indices and the list of visited indices, which the
+renderer colors on the grid. The visited nodes are filled in cyan as the
+frontier expands, and every node on the returned path is then promoted to
+`SolutionNode` and tinted by linearly interpolating between the ending and
+starting node colors — so the path reads as a gradient from one endpoint to the
+other. Pressing **Reset** demotes those `SolutionNode` (and `VisitedNode`) cells
+back to `MovableNode` while leaving your walls intact.
 
 ## Usage
 
@@ -41,7 +47,7 @@ Select a node type under **Node Colors**, then click and drag on the grid to pai
 
 ### 3. Pick an algorithm and solve
 
-Choose **BFS**, **DFS**, **A\***, or **Dijkstra** under **Solving algorithms**, then press **Solve**. Visited cells fill in as the frontier expands, and the final route is highlighted once the goal is reached.
+Choose **BFS**, **DFS**, **A\***, or **Dijkstra** under **Solving algorithms**, then press **Solve**. Visited cells fill in as the frontier expands, and once the goal is reached the final route is highlighted as a color gradient running from the ending node to the starting node.
 
 | BFS | DFS |
 | :---: | :---: |

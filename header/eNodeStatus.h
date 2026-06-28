@@ -6,7 +6,8 @@ enum class eNodeStatus {
     EndingNode,
     BlockingNode,
     MovableNode,
-    VisitedNode
+    VisitedNode,
+    SolutionNode
 };
 
 #endif // ENODESTATUS_H
